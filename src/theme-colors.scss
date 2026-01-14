@@ -3,7 +3,8 @@
 
 @use 'sass:map';
 @use '@angular/material' as mat;
-
+@include mat.elevation-classes();
+@include mat.app-background();
 // Note: Color palettes are generated from primary: #1E40AF, secondary: #10B981, tertiary: #EF4444
 $_palettes: (
   primary: (
@@ -133,5 +134,49 @@ $_rest: (
   error: map.get($_palettes, error),
 );
 
-$primary-palette: map.merge(map.get($_palettes, primary), $_rest);
-$tertiary-palette: map.merge(map.get($_palettes, tertiary), $_rest);
+$_primary: map.merge(map.get($_palettes, primary), $_rest);
+$_tertiary: map.merge(map.get($_palettes, tertiary), $_rest);
+
+$light-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: $_primary,
+      tertiary: $_tertiary,
+      use-system-variables: true,
+      system-variables-prefix: sys,
+    ),
+    typography: (
+      use-system-variables: true,
+      system-variables-prefix: sys,
+    ),
+  )
+);
+$dark-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: dark,
+      primary: $_primary,
+      tertiary: $_tertiary,
+      use-system-variables: true,
+      system-variables-prefix: sys,
+    ),
+    typography: (
+      use-system-variables: true,
+      system-variables-prefix: sys,
+    ),
+  )
+);
+
+html {
+  @include mat.all-component-themes($light-theme);
+  @include mat.system-level-colors($light-theme);
+  @include mat.system-level-typography($light-theme);
+  // @include mat.strong-focus-indicators-theme($light-theme);
+
+  @include mat.divider-overrides(
+    (
+      color: mat.get-theme-color($light-theme, secondary-fixed-dim),
+    )
+  );
+}
