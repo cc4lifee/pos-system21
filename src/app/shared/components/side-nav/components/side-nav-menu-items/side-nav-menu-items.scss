@@ -1,0 +1,94 @@
+label {
+  color: var(--sys-on-surface);
+  cursor: pointer;
+}
+
+.minimized label {
+  display: block;
+  white-space: nowrap;
+  max-width: 4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.minimized {
+  margin-bottom: 1rem;
+  flex-direction: column;
+}
+
+.material-symbols-outlined {
+  color: var(--sys-on-surface);
+}
+
+div {
+  display: flex;
+  align-items: center;
+}
+
+.menu-item {
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+
+.mouse-pointer {
+  cursor: pointer;
+}
+
+.maximized button {
+  height: 3.5rem;
+  flex-grow: 1;
+  justify-content: flex-start;
+}
+
+button.active {
+  background-color: var(--sys-inverse-primary);
+}
+
+.maximized .material-symbols-outlined {
+  padding-left: 0.5rem;
+  padding-right: 1.25rem;
+}
+
+h4 {
+  margin: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+
+.hover-menu {
+  display: none;
+  position: absolute;
+  margin-top: -5rem;
+  right: -12.5rem;
+  width: 12.5rem;
+  flex-direction: column;
+  background-color: var(--sys-surface-container);
+  padding: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+.hover-menu.maximized {
+  margin-top: -4rem;
+}
+
+.hover-menu button {
+  height: 3.5rem;
+  padding-left: 1.25rem;
+  width: 100%;
+  border-radius: 0;
+  justify-content: flex-start;
+}
+
+.inline-menu {
+  margin: 0.5rem 2rem 0.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.inline-menu button {
+  width: 100%;
+  justify-content: flex-start;
+  white-space: nowrap;
+  overflow-x: hidden;
+}

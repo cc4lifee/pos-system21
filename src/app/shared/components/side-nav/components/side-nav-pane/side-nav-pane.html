@@ -1,0 +1,83 @@
+<mat-drawer-container class="container">
+  <!-- <mat-drawer mode="side" [class.sidenav-menu-half]="sideNavService.minimized()"> -->
+  <mat-drawer mode="side" opened [class.sidenav-menu-half]="sideNavService.minimized()">
+    <div class="drawer-container">
+      <!-- First Row -->
+      <div [class.sidenav-row]="!sideNavService.minimized()">
+        <div class="menu-item">
+          <button id="toggle" type="button" mat-button (click)="toggleMinimized()">
+            <span class="material-symbols-outlined">{{ sideNavService.minimized() ? "last_page" : "first_page" }}</span>
+          </button>
+          @if (sideNavService.minimized()) {
+          <label for="toggle" class="label-medium font-weight-700">Expand</label>
+          }
+        </div>
+
+        @if (!sideNavService.minimized()) {
+        <h4 class="title-medium">Pos System</h4>
+        }
+
+        <div class="menu-item">
+          <button routerLink="/dashboard" id="home" type="button" mat-button >
+            <span class="material-symbols-outlined">home</span>
+          </button>
+          @if (sideNavService.minimized()) {
+          <label for="home" class="label-medium font-weight-700">Home</label>
+          }
+        </div>
+      </div>
+
+      <!-- Second Row -->
+      
+
+      <div [class.sidenav-row]="!sideNavService.minimized()">
+        @if (!sideNavService.minimized()) {
+        <!-- <button id="more" type="button" mat-button>
+          <span class="material-symbols-outlined">more_vert</span>
+        </button> -->
+      
+
+        <div class="middle-label">
+          <!-- <h4 class="title-medium">{{ this.authService.user.name| fullName }}</h4> -->
+          <h4 class="title-medium">{{ this.authService.user()?.full_name }}</h4>
+          
+        </div>
+        
+
+        }
+
+        <div class="menu-item">
+          <button id="profile" type="button" mat-button>
+            @if (this.authService.user() !== null) {
+
+            <!-- <img alt="User Icon" src="{{user.image_url}}" (error)="imageLoadError()" /> -->
+            } @else {
+            <span class="material-symbols-outlined">person</span>
+            }
+          </button>
+          @if (sideNavService.minimized()) {
+          <label for="profile" class="label-medium font-weight-700">Profile</label>
+          }
+        </div>
+      </div>
+
+      @if (!sideNavService.minimized()) {
+      <mat-divider />
+      }
+
+
+      <!-- App Items -->
+      <app-side-nav-menu-items />
+
+      <!-- Version number + logout (optional) -->
+      @if (!sideNavService.minimized()) {
+      <!-- <p class="version-number">Version 1.0.0</p> -->
+      }
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <ng-content />
+   
+  </mat-drawer-content>
+</mat-drawer-container>

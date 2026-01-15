@@ -1,0 +1,87 @@
+
+
+<div class="menu-item" [class.minimized]="sideNavService.minimized()" [class.maximized]="!sideNavService.minimized()"
+  [class.mouse-pointer]="!active() || sideNavService.minimized()" (mouseenter)="openMenu()" (mouseleave)="closeMenu()">
+  <!-- <button (click)="navigate()" [class.active]="active() && sideNavService.minimized()" -->
+  <button  [class.active]="active() && sideNavService.minimized()"
+    id="study-explorer" type="button" mat-button>
+    <div>
+      <span class="material-symbols-outlined">view_list</span>
+      @if (!sideNavService.minimized()) {
+      <h4 class='title-medium on-surface-color'>Example</h4>
+      }
+    </div>
+  </button>
+
+  <!-- @if (!sideNavService.minimized()) { -->
+  <!-- <label for="route-analysis"> -->
+  <!-- <span class="material-symbols-outlined">{{ active() ? "keyboard_arrow_down" : "keyboard_arrow_right" }}</span> -->
+  <!-- @if (!active()) {<span class="material-symbols-outlined">keyboard_arrow_right</span>} -->
+  <!-- </label> -->
+  <!-- } -->
+  <!-- @if (sideNavService.minimized()) { -->
+  <!-- <label matTooltip="Route Analysis" class='label-medium font-weight-700'>
+    Route Analysis
+  </label> -->
+  <!-- <label matTooltip="Study Explorer" class='label-medium font-weight-700'>
+    Study Explorer
+  </label> -->
+  <!-- } -->
+</div>
+
+<div class="menu-item" [class.minimized]="sideNavService.minimized()" [class.maximized]="!sideNavService.minimized()"
+  [class.mouse-pointer]="!active() || sideNavService.minimized()" (mouseenter)="openMenu()" (mouseleave)="closeMenu()">
+  <button (click)="navigateColorPalette()" [class.active]="active() && sideNavService.minimized()" id="study-explorer"
+    type="button" mat-button>
+    <div>
+      <span class="material-symbols-outlined">palette</span>
+      @if (!sideNavService.minimized()) {
+      <h4 class='title-medium on-surface-color'>Color Palletes</h4>
+      }
+    </div>
+  </button>
+
+  <!-- @if (!sideNavService.minimized()) { -->
+  <!-- <label for="route-analysis"> -->
+  <!-- <span class="material-symbols-outlined">{{ active() ? "keyboard_arrow_down" : "keyboard_arrow_right" }}</span> -->
+  <!-- @if (!active()) {<span class="material-symbols-outlined">keyboard_arrow_right</span>} -->
+  <!-- </label> -->
+  <!-- } -->
+  <!-- @if (sideNavService.minimized()) { -->
+  <!-- <label matTooltip="Route Analysis" class='label-medium font-weight-700'>
+    Route Analysis
+  </label> -->
+  <!-- <label matTooltip="Study Explorer" class='label-medium font-weight-700'>
+    Study Explorer
+  </label> -->
+  <!-- } -->
+</div>
+
+<!-- <div #menu [class.hover-menu]="sideNavService.minimized() || !active()"
+  [class.inline-menu]="active() && !sideNavService.minimized()" [class.maximized]="!sideNavService.minimized()"
+  (mouseenter)="openMenu()" (mouseleave)="closeMenu()">
+  <button routerLinkActive="active" routerLink="/aircraft-inputs" mat-button>
+    <span
+      [class]="active() && !sideNavService.minimized() ? 'title-medium on-surface-color' : 'body-large on-surface-color'">
+      Aircraft Inputs
+    </span>
+  </button>
+  <button routerLinkActive="active" routerLink="/route-inputs" mat-button>
+    <span
+      [class]="active() && !sideNavService.minimized() ? 'title-medium on-surface-color' : 'body-large on-surface-color'">
+      Route Inputs
+    </span>
+  </button>
+  <button routerLinkActive="active" routerLink="/route-parameters" mat-button>
+    <span
+      [class]="active() && !sideNavService.minimized() ? 'title-medium on-surface-color' : 'body-large on-surface-color'">
+      Route Parameters
+    </span>
+  </button>
+  <button routerLinkActive="active" routerLink="/fp-output" mat-button>
+    <span
+      [class]="active() && !sideNavService.minimized() ? 'title-medium on-surface-color' : 'body-large on-surface-color'">
+      FP Output
+    </span>
+  </button>
+</div> -->

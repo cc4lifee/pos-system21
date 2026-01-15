@@ -180,3 +180,429 @@ html {
     )
   );
 }
+
+
+.title-small {
+  font: mat.get-theme-typography($light-theme, title-small, font);
+  color: mat.get-theme-color($light-theme, primary);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  &.on-primary-container-color {
+    color: mat.get-theme-color($light-theme, on-primary-container);
+  }
+  &.secondary-color {
+    color: mat.get-theme-color($light-theme, secondary);
+  }
+  &.outline-color {
+    color: mat.get-theme-color($light-theme, outline);
+  }
+  font-weight: 600;
+}
+
+.title-medium {
+  font: mat.get-theme-typography($light-theme, title-medium, font);
+  color: mat.get-theme-color($light-theme, primary);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  &.on-primary-container-color {
+    color: mat.get-theme-color($light-theme, on-primary-container);
+  }
+  &.on-secondary-container-color {
+    color: mat.get-theme-color($light-theme, on-secondary-container);
+  }
+  &.secondary-color {
+    color: mat.get-theme-color($light-theme, secondary);
+  }
+  &.outline-color {
+    color: mat.get-theme-color($light-theme, outline);
+  }
+
+  font-weight: 600;
+}
+
+.title-large {
+  font: mat.get-theme-typography($light-theme, title-large, font);
+  color: mat.get-theme-color($light-theme, primary);
+  &.shadow {
+    color: mat.get-theme-color($light-theme, shadow);
+  }
+  font-weight: 500;
+}
+
+.display-large {
+  font: mat.get-theme-typography($light-theme, display-large, font);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+}
+
+.display-medium {
+  font: mat.get-theme-typography($light-theme, display-medium, font);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+}
+
+.display-small {
+  font: mat.get-theme-typography($light-theme, display-small, font);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+}
+
+.headline-small {
+  font: mat.get-theme-typography($light-theme, headline-small, font);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  &.on-surface-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
+  font-weight: 600;
+}
+
+.headline-small-400 {
+  font: mat.get-theme-typography($light-theme, headline-small, font);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  font-weight: 400;
+}
+
+.title-medium {
+  font: mat.get-theme-typography($light-theme, title-medium, font);
+  font-weight: 600;
+  color: mat.get-theme-color($light-theme, primary);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  &.on-primary-container-color {
+    color: mat.get-theme-color($light-theme, on-primary-container);
+  }
+  &.secondary-color {
+    color: mat.get-theme-color($light-theme, secondary);
+  }
+  &.outline-color {
+    color: mat.get-theme-color($light-theme, outline);
+  }
+  &.on-surface-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
+  &.font-weight-500 {
+    font-weight: 500;
+  }
+}
+
+.title-small {
+  font: mat.get-theme-typography($light-theme, title-small, font);
+  color: mat.get-theme-color($light-theme, primary);
+  &.primary-color {
+    color: mat.get-theme-color($light-theme, primary);
+  }
+  &.on-primary-container-color {
+    color: mat.get-theme-color($light-theme, on-primary-container);
+  }
+  &.secondary-color {
+    color: mat.get-theme-color($light-theme, secondary);
+  }
+  &.outline-color {
+    color: mat.get-theme-color($light-theme, outline);
+  }
+}
+
+.body-medium {
+  font: mat.get-theme-typography($light-theme, body-medium, font);
+  &.on-primary-color {
+    color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-background-color {
+    color: mat.get-theme-color($light-theme, on-background);
+  }
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+.body-large {
+  font: mat.get-theme-typography($light-theme, body-large, font);
+  &.on-primary-color {
+    color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-background-color {
+    color: mat.get-theme-color($light-theme, on-background);
+  }
+  &.on-surface-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+.label-medium {
+  font: mat.get-theme-typography($light-theme, label-medium, font);
+  // &.on-primary-color {
+  //   color: mat.get-theme-color($light-theme, on-primary);
+  // }
+  // &.on-background-color {
+  //   color: mat.get-theme-color($light-theme, on-background);
+  // }
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+// <button mat-raised-button class="primary-button">
+button[mat-raised-button].primary-button {
+  background-color: mat.get-theme-color($light-theme, primary);
+  color: mat.get-theme-color($light-theme, on-primary);
+}
+
+// <button mat-raised-button class="secondary-button">
+button[mat-raised-button].secondary-button {
+  background-color: mat.get-theme-color($light-theme, on-primary);
+  color: mat.get-theme-color($light-theme, on-surface);
+}
+
+// <button mat-stroked-button class="secondary-button">
+button[mat-stroked-button].secondary-button {
+  background-color: mat.get-theme-color($light-theme, on-primary);
+  color: mat.get-theme-color($light-theme, on-surface);
+}
+
+.primary-color {
+  color: mat.get-theme-color($light-theme, primary);
+}
+
+.secondary-color {
+  color: mat.get-theme-color($light-theme, secondary);
+}
+
+.inverse-on-surface {
+  background-color: mat.get-theme-color($light-theme, inverse-on-surface);
+}
+
+.surface-container-high {
+  background-color: mat.get-theme-color($light-theme, surface-container-high);
+}
+
+.surface-container-color {
+  &.background-color {
+    background-color: mat.get-theme-color($light-theme, surface-container);
+  }
+}
+
+.primary-color-button {
+  background-color: mat.get-theme-color($light-theme, primary);
+  color: #fff;
+  width: 80px;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.active {
+  border-bottom: 0.4rem solid mat.get-theme-color($light-theme, primary);
+}
+
+div.chip-list-container {
+  &.surface-container {
+    background-color: mat.get-theme-color($light-theme, surface-container);
+  }
+  &.surface-dim {
+    background-color: mat.get-theme-color($light-theme, surface-dim);
+  }
+  &.secondary-fixed-dim {
+    background-color: mat.get-theme-color($light-theme, secondary-fixed-dim);
+  }
+}
+
+.custom-tooltip-box {
+  background-color: mat.get-theme-color($light-theme, on-primary-container);
+}
+
+/* Color Palette Container */
+div.color-palette-container {
+  width: 200px;
+  height: 100px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black;
+
+  &.primary {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, primary);
+  }
+  &.primary-container {
+    background-color: mat.get-theme-color($light-theme, primary-container);
+  }
+  &.primary-fixed {
+    background-color: mat.get-theme-color($light-theme, primary-fixed);
+  }
+  &.primary-fixed-dim {
+    background-color: mat.get-theme-color($light-theme, primary-fixed-dim);
+  }
+  &.on-primary {
+    background-color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-primary-container {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-primary-container);
+  }
+  &.on-primary-fixed {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-primary-fixed);
+  }
+  &.on-primary-fixed-variant {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-primary-fixed-variant);
+  }
+  &.inverse-primary {
+    background-color: mat.get-theme-color($light-theme, inverse-primary);
+  }
+
+  &.secondary {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, secondary);
+  }
+  &.secondary-container {
+    background-color: mat.get-theme-color($light-theme, secondary-container);
+  }
+  &.secondary-fixed {
+    background-color: mat.get-theme-color($light-theme, secondary-fixed);
+  }
+  &.secondary-fixed-dim {
+    background-color: mat.get-theme-color($light-theme, secondary-fixed-dim);
+  }
+  &.on-secondary {
+    background-color: mat.get-theme-color($light-theme, on-secondary);
+  }
+  &.on-secondary-container {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-secondary-container);
+  }
+  &.on-secondary-fixed {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-secondary-fixed);
+  }
+  &.on-secondary-fixed-variant {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-secondary-fixed-variant);
+  }
+
+  &.tertiary {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, tertiary);
+  }
+  &.tertiary-container {
+    background-color: mat.get-theme-color($light-theme, tertiary-container);
+  }
+  &.tertiary-fixed {
+    background-color: mat.get-theme-color($light-theme, tertiary-fixed);
+  }
+  &.tertiary-fixed-dim {
+    background-color: mat.get-theme-color($light-theme, tertiary-fixed-dim);
+  }
+  &.on-tertiary {
+    background-color: mat.get-theme-color($light-theme, on-tertiary);
+  }
+  &.on-tertiary-container {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-tertiary-container);
+  }
+  &.on-tertiary-fixed {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-tertiary-fixed);
+  }
+  &.on-tertiary-fixed-variant {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-tertiary-fixed-variant);
+  }
+
+  &.surface {
+    background-color: mat.get-theme-color($light-theme, surface);
+  }
+  &.surface-bright {
+    background-color: mat.get-theme-color($light-theme, surface-bright);
+  }
+  &.surface-container {
+    background-color: mat.get-theme-color($light-theme, surface-container);
+  }
+  &.surface-container-high {
+    background-color: mat.get-theme-color($light-theme, surface-container-high);
+  }
+  &.surface-container-highest {
+    background-color: mat.get-theme-color($light-theme, surface-container-highest);
+  }
+  &.surface-container-low {
+    background-color: mat.get-theme-color($light-theme, surface-container-low);
+  }
+  &.surface-container-lowest {
+    background-color: mat.get-theme-color($light-theme, surface-container-lowest);
+  }
+  &.surface-dim {
+    background-color: mat.get-theme-color($light-theme, surface-dim);
+  }
+  &.surface-tint {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, surface-tint);
+  }
+  &.surface-variant {
+    background-color: mat.get-theme-color($light-theme, surface-variant);
+  }
+  &.on-surface {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-surface);
+  }
+  &.on-surface-variant {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-surface-variant);
+  }
+  &.inverse-surface {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, inverse-surface);
+  }
+  &.inverse-on-surface {
+    background-color: mat.get-theme-color($light-theme, inverse-on-surface);
+  }
+
+  &.error {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, error);
+  }
+  &.error-container {
+    background-color: mat.get-theme-color($light-theme, error-container);
+  }
+  &.on-error {
+    background-color: mat.get-theme-color($light-theme, on-error);
+  }
+  &.on-error-container {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-error-container);
+  }
+
+  &.background {
+    background-color: mat.get-theme-color($light-theme, background);
+  }
+  &.on-background {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, on-background);
+  }
+
+  &.outline {
+    background-color: mat.get-theme-color($light-theme, outline);
+  }
+  &.outline-variant {
+    background-color: mat.get-theme-color($light-theme, outline-variant);
+  }
+
+  &.scrim {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, scrim);
+  }
+  &.shadow {
+    color: mat.get-theme-color($light-theme, on-primary);
+    background-color: mat.get-theme-color($light-theme, shadow);
+  }
+}
