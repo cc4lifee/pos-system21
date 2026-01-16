@@ -48,6 +48,7 @@ export class SideNavPane {
     console.log('onInit');
     // Detectar breakpoint
     const bpSub = this.bp.observe('(max-width: 768px)').subscribe((res) => {
+      console.log('goes here');
       const mobile = res.matches;
       this.isMobile.set(mobile);
       // En móvil, cerramos el sidenav inicialmente

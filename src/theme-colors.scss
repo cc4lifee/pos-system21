@@ -176,7 +176,7 @@ html {
 
   @include mat.divider-overrides(
     (
-      color: mat.get-theme-color($light-theme, secondary-fixed-dim),
+      color: mat.get-theme-color($light-theme, on-surface-variant),
     )
   );
 }
