@@ -14,7 +14,7 @@
   >
     <div>
       <span class="material-symbols-outlined">view_list</span>
-      @if (!sideNavService.isMinimized()) {
+      @if (sideNavService.showLabels()) {
         <h4 class="title-medium on-surface-color">Example</h4>
       }
     </div>
@@ -38,7 +38,7 @@
   >
     <div>
       <span class="material-symbols-outlined">palette</span>
-      @if (!sideNavService.isMinimized()) {
+      @if (sideNavService.showLabels()) {
         <h4 class="title-medium on-surface-color">Color Palletes</h4>
       }
     </div>

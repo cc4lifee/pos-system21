@@ -23,47 +23,18 @@ import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
   templateUrl: './side-nav-pane.html',
   styleUrl: './side-nav-pane.scss',
 })
-export class SideNavPane implements AfterViewInit {
-  protected readonly sideNavService = inject(SideNavService);
+export class SideNavPane {
+  protected readonly sideNav = inject(SideNavService);
 
-  @ViewChild(MatDrawerContainer) drawerContainer?: MatDrawerContainer;
-
-  ngAfterViewInit(): void {
-    // Recalcular automáticamente el layout
-    effect(() => {
-      // Dependencias reactivas
-      this.sideNavService.isMinimized();
-      this.sideNavService.isMobile();
-      this.sideNavService.isDrawerOpen();
-      this.sideNavService.drawerMode();
-
-      // Esperar al siguiente ciclo de render
-      queueMicrotask(() => {
-        this.drawerContainer?.updateContentMargins();
-      });
-    });
+  onToggleDesktopMinimize(): void {
+    this.sideNav.toggleDesktopMinimize();
   }
 
-  /**
-   * Toggle minimizar (desktop/tablet)
-   */
-  onToggleMinimized(): void {
-    this.sideNavService.toggleMinimized();
+  onToggleMobile(): void {
+    this.sideNav.toggleMobileDrawer();
   }
 
-  /**
-   * Toggle drawer (móvil)
-   */
-  onToggleDrawer(): void {
-    this.sideNavService.toggleDrawer();
-  }
-
-  /**
-   * Cerrar drawer cuando se selecciona un item (móvil)
-   */
-  onMenuItemSelected(): void {
-    if (this.sideNavService.isMobile()) {
-      this.sideNavService.closeDrawer();
-    }
+  onMobileItemSelected(): void {
+    this.sideNav.closeMobile();
   }
 }
