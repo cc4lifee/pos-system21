@@ -18,7 +18,9 @@
         </button>
       </div>
 
-      <mat-divider />
+      @if (!sideNav.isMinimized()) {
+        <mat-divider />
+      }
 
       <app-side-nav-menu-items />
     </mat-drawer>
@@ -27,7 +29,9 @@
   <!-- ✅ MOBILE SIDENAV -->
   @if (sideNav.isMobile()) {
     <mat-drawer mode="over" [opened]="sideNav.mobileOpen()" (closed)="sideNav.closeMobile()">
-      <app-side-nav-menu-items (itemSelected)="sideNav.closeMobile()" />
+      <div style="margin-top: 1rem">
+        <app-side-nav-menu-items (itemSelected)="sideNav.closeMobile()" />
+      </div>
     </mat-drawer>
   }
 
