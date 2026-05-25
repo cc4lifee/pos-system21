@@ -1,1 +1,44 @@
-<p>login works!</p>
+<div class="auth-container">
+  <mat-card class="auth-card" mat-elevation-z8>
+    <h2 class="title">☕ Welcome Back</h2>
+    <p class="subtitle">Sign in to your account</p>
+
+    <form (submit)="onSubmit($event)">
+      <!-- EMAIL -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+
+        <input matInput type="email" placeholder="your@email.com" [formField]="loginForm.email" />
+
+        <mat-icon matPrefix>mail</mat-icon>
+
+        @if (loginForm.email().touched() && loginForm.email().invalid()) {
+          <mat-error>{{ loginForm.email().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- PASSWORD -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+
+        <input matInput type="password" placeholder="••••••••" [formField]="loginForm.password" />
+
+        <mat-icon matPrefix>lock</mat-icon>
+
+        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+          <mat-error>{{ loginForm.password().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- BUTTON -->
+      <button mat-raised-button color="primary" class="full-width login-btn" type="submit">
+        Login
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Don’t have an account?
+      <a routerLink="/auth/register">Register</a>
+    </p>
+  </mat-card>
+</div>

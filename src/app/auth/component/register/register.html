@@ -1,1 +1,70 @@
-<p>register works!</p>
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <h2 class="title">☕ Create Account</h2>
+
+    <form (submit)="onSubmit($event)">
+      <!-- NAME -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+
+        <input matInput type="text" placeholder="John Doe" [formField]="registerForm.name" />
+
+        <mat-icon matPrefix>person</mat-icon>
+
+        @if (registerForm.name().touched() && registerForm.name().invalid()) {
+          <mat-error>{{ registerForm.name().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- EMAIL -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+
+        <input
+          matInput
+          type="email"
+          placeholder="your@email.com"
+          [formField]="registerForm.email"
+        />
+
+        <mat-icon matPrefix>mail</mat-icon>
+
+        @if (registerForm.email().touched() && registerForm.email().invalid()) {
+          <mat-error>{{ registerForm.email().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- PASSWORD -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+
+        <input
+          matInput
+          type="password"
+          placeholder="••••••••"
+          [formField]="registerForm.password"
+        />
+
+        <mat-icon matPrefix>lock</mat-icon>
+
+        @if (registerForm.password().touched() && registerForm.password().invalid()) {
+          <mat-error>
+            @for (error of registerForm.password().errors(); track error) {
+              <span class="error-line">{{ error.message }}</span>
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <!-- BUTTON -->
+      <button mat-raised-button color="primary" class="full-width register-btn" type="submit">
+        Register
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Already have an account?
+      <a routerLink="/auth/login">Login</a>
+    </p>
+  </mat-card>
+</div>
