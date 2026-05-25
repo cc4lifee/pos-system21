@@ -1,80 +1,59 @@
-<mat-drawer-container class="container">
-  <!-- <mat-drawer mode="side" [class.sidenav-menu-half]="sideNavService.minimized()"> -->
-  <mat-drawer mode="side" opened [class.sidenav-menu-half]="sideNavService.minimized()">
-    <div class="drawer-container">
-      <!-- First Row -->
-      <div [class.sidenav-row]="!sideNavService.minimized()">
-        <div class="menu-item">
-          <button id="toggle" type="button" mat-button (click)="toggleMinimized()">
-            <span class="material-symbols-outlined">{{
-              sideNavService.minimized() ? 'last_page' : 'first_page'
-            }}</span>
-          </button>
-          @if (sideNavService.minimized()) {
-          <label for="toggle" class="label-medium font-weight-700">Expand</label>
-          }
-        </div>
-
-        @if (!sideNavService.minimized()) {
-        <h4 class="title-medium">Pos System</h4>
+<mat-drawer-container class="sidenav-container">
+  <!-- DRAWER (Lateral o Overlay según responsive) -->
+  <mat-drawer
+    #drawer
+    [mode]="sideNavService.drawerMode()"
+    [opened]="sideNavService.isMobile() ? sideNavService.isDrawerOpen() : true"
+    [disableClose]="!sideNavService.isMobile()"
+    class="sidenav-drawer"
+    [class.minimized]="sideNavService.isMinimized() && !sideNavService.isMobile()"
+  >
+    <div class="drawer-content">
+      <!-- Header: Logo / Título + Toggle Minimize -->
+      <div class="drawer-header">
+        @if (!sideNavService.isMinimized() || sideNavService.isMobile()) {
+          <h3 class="drawer-title">POS System</h3>
         }
-
-        <div class="menu-item">
-          <button routerLink="/dashboard" id="home" type="button" mat-button>
-            <span class="material-symbols-outlined">home</span>
+        @if (!sideNavService.isMobile()) {
+          <button
+            mat-icon-button
+            (click)="onToggleMinimized()"
+            class="toggle-minimize-btn"
+            [attr.aria-label]="sideNavService.isMinimized() ? 'Expandir' : 'Minimizar'"
+          >
+            <mat-icon>
+              {{ sideNavService.isMinimized() ? 'chevron_right' : 'chevron_left' }}
+            </mat-icon>
           </button>
-          @if (sideNavService.minimized()) {
-          <label for="home" class="label-medium font-weight-700">Home</label>
-          }
-        </div>
+        }
       </div>
 
-      <!-- Second Row -->
+      <mat-divider></mat-divider>
 
-      <div [class.sidenav-row]="!sideNavService.minimized()">
-        @if (!sideNavService.minimized()) {
-        <!-- <button id="more" type="button" mat-button>
-          <span class="material-symbols-outlined">more_vert</span>
-        </button> -->
-
-        <div class="middle-label">
-          <!-- <h4 class="title-medium">{{ this.authService.user.name| fullName }}</h4> -->
-          <!-- <h4 class="title-medium">{{ this.authService.user()?.full_name }}</h4> -->
-          <h4 class="title-medium">Cristhian Camacho</h4>
-        </div>
-
-        }
-
-        <div class="menu-item">
-          <button id="profile" type="button" mat-button>
-            @if (this.authService.user() !== null) {
-
-            <!-- <img alt="User Icon" src="{{user.image_url}}" (error)="imageLoadError()" /> -->
-            } @else {
-            <span class="material-symbols-outlined">person</span>
-            }
-          </button>
-          @if (sideNavService.minimized()) {
-          <label for="profile" class="label-medium font-weight-700">Profile</label>
-          }
-        </div>
+      <!-- Menu Items -->
+      <div class="drawer-menu">
+        <app-side-nav-menu-items (itemSelected)="onMenuItemSelected()"></app-side-nav-menu-items>
       </div>
 
-      @if (!sideNavService.minimized()) {
-      <mat-divider />
-      }
-
-      <!-- App Items -->
-      <app-side-nav-menu-items />
-
-      <!-- Version number + logout (optional) -->
-      @if (!sideNavService.minimized()) {
-      <!-- <p class="version-number">Version 1.0.0</p> -->
-      }
+      <mat-divider></mat-divider>
     </div>
   </mat-drawer>
 
-  <mat-drawer-content>
-    <ng-content />
+  <!-- Main Content Area -->
+  <mat-drawer-content class="main-content">
+    <!-- Hamburguesa (solo en móvil) -->
+    @if (sideNavService.isMobile()) {
+      <button
+        mat-icon-button
+        (click)="onToggleDrawer()"
+        class="mobile-menu-btn"
+        [attr.aria-label]="'Menú'"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
+
+    <!-- Contenido de la aplicación -->
+    <ng-content></ng-content>
   </mat-drawer-content>
 </mat-drawer-container>

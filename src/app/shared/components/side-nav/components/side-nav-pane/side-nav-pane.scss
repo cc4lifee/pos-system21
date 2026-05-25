@@ -4,21 +4,29 @@ mat-drawer-container {
   background-color: white;
 }
 
-// mat-drawer-content {
-//   padding-top: 1.5rem;
-// }
+mat-drawer-content {
+  transition:
+    margin-left 250ms ease,
+    width 250ms ease;
+
+  min-height: 100vh;
+}
 
 mat-drawer {
   padding: 0.5rem 0rem;
   width: 17rem;
   background-color: var(--sys-surface-container-high);
   border-radius: 0;
-  transition: all 0.3s ease;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition:
+    width 250ms ease,
+    transform 250ms ease;
+  will-change: width;
 }
 
-.drawer-container {
-  overflow: hidden;
+mat-drawer.minimized {
+  width: 5rem;
 }
 
 .sidenav-row {

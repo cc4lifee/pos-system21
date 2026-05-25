@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import {MatIconModule} from '@angular/material/icon';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatButtonModule} from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-color-palette',
@@ -10,5 +10,6 @@ import {MatButtonModule} from '@angular/material/button';
   styleUrl: './color-palette.scss',
 })
 export class ColorPalette {
-
+  // Coffee Shop Theme Colors
+  themeTitle = 'Coffee Shop Theme';
 }

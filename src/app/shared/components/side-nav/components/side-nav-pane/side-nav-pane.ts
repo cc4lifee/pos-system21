@@ -1,75 +1,69 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { AuthService } from '../../../../../auth/services/auth.service';
-import { SideNavService } from '../../services/side-nav.service';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatDrawerContent, MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
+import { AfterViewInit, Component, effect, inject, ViewChild } from '@angular/core';
+import { MatSidenavModule, MatDrawerContainer, MatDrawer } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
-
-// import { FullNamePipe } from '../../../pipes/full-name/full-name.pipe';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SideNavService } from '../../services/side-nav.service';
 import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
 
 @Component({
   selector: 'app-side-nav-pane',
+  standalone: true,
   imports: [
+    CommonModule,
     MatSidenavModule,
     MatButtonModule,
-    MatListModule,
-    SideNavMenuItems,
-    // FullNamePipe,
+    MatDividerModule,
+    MatIconModule,
     RouterModule,
+    SideNavMenuItems,
   ],
   templateUrl: './side-nav-pane.html',
   styleUrl: './side-nav-pane.scss',
 })
-export class SideNavPane {
-  protected readonly authService = inject(AuthService);
+export class SideNavPane implements AfterViewInit {
   protected readonly sideNavService = inject(SideNavService);
-  private readonly bp = inject(BreakpointObserver);
 
-  private readonly sub$ = new Subscription();
+  @ViewChild(MatDrawerContainer) drawerContainer?: MatDrawerContainer;
 
-  // Perfil (imagen fallback)
-  protected readonly showProfileImage = signal(true);
+  ngAfterViewInit(): void {
+    // Recalcular automáticamente el layout
+    effect(() => {
+      // Dependencias reactivas
+      this.sideNavService.isMinimized();
+      this.sideNavService.isMobile();
+      this.sideNavService.isDrawerOpen();
+      this.sideNavService.drawerMode();
 
-  // Responsive: modo del sidenav
-  protected readonly isMobile = signal(false);
-  readonly sidenavMode = computed<'side' | 'over'>(() => (this.isMobile() ? 'over' : 'side'));
-
-  // Estado visual: ancho
-  // readonly width = computed(() => (this.sideNavService.minimized() ? '5rem' : '17rem'));
-
-  @ViewChild(MatDrawerContent) content!: MatDrawerContent;
-
-
-  ngOnInit(): void {
-    console.log('onInit');
-    // Detectar breakpoint
-    const bpSub = this.bp.observe('(max-width: 768px)').subscribe((res) => {
-      console.log('goes here');
-      const mobile = res.matches;
-      this.isMobile.set(mobile);
-      // En móvil, cerramos el sidenav inicialmente
-      this.sideNavService.setOpened(!mobile);
+      // Esperar al siguiente ciclo de render
+      queueMicrotask(() => {
+        this.drawerContainer?.updateContentMargins();
+      });
     });
-
-    this.sub$.add(bpSub);
   }
 
-  ngOnDestroy(): void {
-    this.sub$.unsubscribe();
-  }
-
-  toggleMinimized(): void {
+  /**
+   * Toggle minimizar (desktop/tablet)
+   */
+  onToggleMinimized(): void {
     this.sideNavService.toggleMinimized();
-    this.content.getElementRef().nativeElement.style.marginLeft = this.sideNavService.minimized() ? '5rem' : '17rem';
-
   }
 
-  toggleOpened(): void {
-    this.sideNavService.setOpened(!this.sideNavService.opened());
+  /**
+   * Toggle drawer (móvil)
+   */
+  onToggleDrawer(): void {
+    this.sideNavService.toggleDrawer();
+  }
+
+  /**
+   * Cerrar drawer cuando se selecciona un item (móvil)
+   */
+  onMenuItemSelected(): void {
+    if (this.sideNavService.isMobile()) {
+      this.sideNavService.closeDrawer();
+    }
   }
 }
-

@@ -4,7 +4,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable, map, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-
 export interface ApiResponse {
   type: 'Success' | 'Warning' | 'Failure';
   statusCode: number;
@@ -30,12 +29,10 @@ export interface AuthResponse {
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 const baseUrl = environment.baseUrl;
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-
   private readonly http = inject(HttpClient);
 
   private _authStatus = signal<AuthStatus>('checking');
@@ -44,11 +41,10 @@ export class AuthService {
 
   checkStatusResource = rxResource({
     // loader: () => this.checkStatus(),
-    stream: () => this.checkStatus()
+    stream: () => this.checkStatus(),
   });
 
-
-   authStatus = computed<AuthStatus>(() => {
+  authStatus = computed<AuthStatus>(() => {
     if (this._authStatus() === 'checking') return 'checking';
 
     if (this._user()) {
@@ -62,8 +58,6 @@ export class AuthService {
   token = computed(() => this._token);
   isAdmin = computed(() => this._user()?.role.includes('ADMIN') ?? false);
 
-  
-
   login(email: string, password: string): Observable<boolean> {
     return this.http
       .post<AuthResponse>(`${baseUrl}/auth/login`, {
@@ -72,7 +66,7 @@ export class AuthService {
       })
       .pipe(
         map((resp) => this.handleAuthSuccess(resp)),
-        catchError((error: any) => this.handleAuthError(error))
+        catchError((error: any) => this.handleAuthError(error)),
       );
   }
 
@@ -91,7 +85,7 @@ export class AuthService {
       })
       .pipe(
         map((resp) => this.handleAuthSuccess(resp)),
-        catchError((error: any) => this.handleAuthError(error))
+        catchError((error: any) => this.handleAuthError(error)),
       );
   }
 
@@ -108,6 +102,7 @@ export class AuthService {
     this._authStatus.set('authenticated');
     this._token.set(token);
 
+    //! No hay que guardar el token en local Storage, mejor en cookies?
     localStorage.setItem('token', token);
 
     return true;
@@ -117,5 +112,4 @@ export class AuthService {
     this.logout();
     return of(false);
   }
-
 }
