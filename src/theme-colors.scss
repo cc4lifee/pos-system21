@@ -389,11 +389,20 @@ button[mat-stroked-button].secondary-button {
   background-color: mat.get-theme-color($light-theme, surface-container-high);
 }
 
+.surface-container-lowest {
+  background-color: mat.get-theme-color($light-theme, surface-container-lowest);
+}
+
+
 .surface-container-color {
   &.background-color {
     background-color: mat.get-theme-color($light-theme, surface-container);
   }
 }
+
+.background {
+    background-color: mat.get-theme-color($light-theme, background);
+  }
 
 .primary-color-button {
   background-color: mat.get-theme-color($light-theme, primary);
