@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users/Employees
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders                Order[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@map("users")
+}
+
+model Role {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  label String?
+  users User[]
+
+  @@map("roles")
+}
+
+// Products
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  price          Float
+  cost           Float?
+  quantity       Int       @default(0)
+  trackInventory Boolean   @default(false)
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  orderItems            OrderItem[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@map("products")
+}
+
+// Orders
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  total         Float
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod @default(CASH)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  CHECK
+  TRANSFER
+}
+
+// Inventory transactions log
+enum InventoryType {
+  SALE
+  ADJUSTMENT
+  PURCHASE
+  RETURN
+  SPOILAGE
+  COUNT
+}
+
+model InventoryTransaction {
+  id             String        @id @default(cuid())
+  productId      String
+  product        Product       @relation(fields: [productId], references: [id])
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id])
+  change         Int
+  type           InventoryType
+  reason         String?
+  referenceId    String?
+  quantityBefore Int
+  quantityAfter  Int
+  createdAt      DateTime      @default(now())
+
+  @@index([productId, createdAt])
+  @@map("inventory_transactions")
+}
+
+// Order Items
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+  subtotal  Float
+  discount  Float   @default(0)
+
+  @@map("order_items")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount         Float
+  method         PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  transactionRef String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("payments")
+}
