@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal, ViewChild, output } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild, output, ChangeDetectionStrategy } from '@angular/core';
 import { SideNavService } from '../../services/side-nav.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,6 +9,7 @@ import { Router, RouterModule } from '@angular/router';
   standalone: true,
   imports: [MatButtonModule, RouterModule, MatTooltipModule],
   templateUrl: './side-nav-menu-items.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './side-nav-menu-items.scss',
 })
 export class SideNavMenuItems {

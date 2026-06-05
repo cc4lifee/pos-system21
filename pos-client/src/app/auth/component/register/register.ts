@@ -17,6 +17,7 @@ interface RegisterData {
   selector: 'app-register',
   imports: [FormField, MatCardModule, MatInputModule, MatButtonModule, MatIconModule, RouterLink],
   templateUrl: './register.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './register.scss',
 })
 export class Register {

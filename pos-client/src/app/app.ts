@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SideNavPane } from './shared/components/side-nav/components/side-nav-pane/side-nav-pane';
 
@@ -6,6 +6,7 @@ import { SideNavPane } from './shared/components/side-nav/components/side-nav-pa
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.scss'
 })
 export class App {

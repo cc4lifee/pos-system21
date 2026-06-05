@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, effect, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, effect, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSidenavModule, MatDrawerContainer, MatDrawer } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -21,6 +21,7 @@ import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
     SideNavMenuItems,
   ],
   templateUrl: './side-nav-pane.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './side-nav-pane.scss',
 })
 export class SideNavPane {
