@@ -6,12 +6,12 @@
 
 /* ===== DRAWER ===== */
 mat-drawer {
-  width: 17rem;
-  min-width: 17rem;
-  max-width: 17rem;
+  width: 15rem;
+  min-width: 15rem;
+  max-width: 15rem;
   display: flex;
   flex-direction: column;
-  background-color: var(--sys-surface-container-high);
+  background-color: var(--sys-inverse-on-surface);
   overflow: hidden;
   transition: width 1000ms ease;
 }
@@ -97,6 +97,7 @@ h3 {
 /* ===== DIVIDERS ===== */
 mat-divider {
   margin: 0rem 1rem 1rem 1rem;
+  border-top-color: var(--sys-outline-variant);
 }
 
 /* SOLO aplica minimized en desktop */

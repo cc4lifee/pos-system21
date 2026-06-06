@@ -30,8 +30,8 @@
     "@angular/forms": "22.0.0",
     "@angular/platform-browser": "22.0.0",
     "@angular/router": "22.0.0",
-    "@angular/cdk": "21.2.12",
-    "@angular/material": "21.2.12",
+    "@angular/cdk": "22.0.0",
+    "@angular/material": "22.0.0",
     "material-symbols": "0.40.2",
     "rxjs": "~7.8.0",
     "tslib": "2.3.0"

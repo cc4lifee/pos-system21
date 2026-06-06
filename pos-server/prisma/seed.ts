@@ -58,6 +58,15 @@ async function main() {
   const catPastry = await prisma.category.create({
     data: { name: "Pastelería" },
   });
+  const catColdDrinks = await prisma.category.create({
+    data: { name: "Bebidas frías" },
+  });
+  const catSandwiches = await prisma.category.create({
+    data: { name: "Sándwiches" },
+  });
+  const catDesserts = await prisma.category.create({
+    data: { name: "Postres" },
+  });
 
   // Create products (cafetería)
   const products = await Promise.all([
@@ -113,6 +122,26 @@ async function main() {
     }),
     prisma.product.create({
       data: {
+        name: "Limonada",
+        description: "Limonada natural con azúcar de caña",
+        price: 3.0,
+        cost: 0.8,
+        quantity: 60,
+        categoryId: catColdDrinks.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Smoothie de Fresa",
+        description: "Batido de fresa fresco con yogur",
+        price: 4.5,
+        cost: 1.5,
+        quantity: 40,
+        categoryId: catColdDrinks.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
         name: "Galleta de Vainilla",
         description: "Galleta artesanal de vainilla (por pieza)",
         price: 1.5,
@@ -131,6 +160,46 @@ async function main() {
         quantity: 30,
         trackInventory: true,
         categoryId: catPastry.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Sándwich de Jamón y Queso",
+        description: "Sándwich caliente con jamón, queso y pan artesanal",
+        price: 5.0,
+        cost: 2.0,
+        quantity: 25,
+        categoryId: catSandwiches.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Wrap Vegetal",
+        description: "Wrap con vegetales frescos y aderezo ligero",
+        price: 4.7,
+        cost: 1.8,
+        quantity: 20,
+        categoryId: catSandwiches.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Cheesecake",
+        description: "Porción de cheesecake con salsa de frutos rojos",
+        price: 4.2,
+        cost: 1.3,
+        quantity: 30,
+        categoryId: catDesserts.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Brownie de Chocolate",
+        description: "Brownie casero con nueces y salsa de chocolate",
+        price: 3.5,
+        cost: 1.0,
+        quantity: 35,
+        categoryId: catDesserts.id,
       },
     }),
   ]);

@@ -1,46 +1,25 @@
-<div
-  class="menu-item"
-  [class.minimized]="sideNavService.isMinimized()"
-  [class.maximized]="!sideNavService.isMinimized()"
-  [class.mouse-pointer]="!active() || sideNavService.isMinimized()"
-  (mouseenter)="openMenu()"
-  (mouseleave)="closeMenu()"
->
-  <button
-    [class.active]="active() && sideNavService.isMinimized()"
-    id="study-explorer"
-    type="button"
-    mat-button
+@for (item of menuItems; track item.id) {
+  <div
+    class="menu-item"
+    [class.minimized]="sideNavService.isMinimized()"
+    [class.maximized]="!sideNavService.isMinimized()"
+    [class.mouse-pointer]="!active() || sideNavService.isMinimized()"
+    (mouseenter)="openMenu()"
+    (mouseleave)="closeMenu()"
   >
-    <div>
-      <span class="material-symbols-outlined">view_list</span>
-      @if (sideNavService.showLabels()) {
-        <h4 class="title-medium on-surface-color">Example</h4>
-      }
-    </div>
-  </button>
-</div>
-
-<div
-  class="menu-item"
-  [class.minimized]="sideNavService.isMinimized()"
-  [class.maximized]="!sideNavService.isMinimized()"
-  [class.mouse-pointer]="!active() || sideNavService.isMinimized()"
-  (mouseenter)="openMenu()"
-  (mouseleave)="closeMenu()"
->
-  <button
-    (click)="navigateColorPalette()"
-    [class.active]="active() && sideNavService.isMinimized()"
-    id="study-explorer"
-    type="button"
-    mat-button
-  >
-    <div>
-      <span class="material-symbols-outlined">palette</span>
-      @if (sideNavService.showLabels()) {
-        <h4 class="title-medium on-surface-color">Color Palletes</h4>
-      }
-    </div>
-  </button>
-</div>
+    <button
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      id="{{ item.id }}"
+      matButton
+    >
+      <div>
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        @if (sideNavService.showLabels()) {
+          <h4 class="title-medium on-surface-color">{{ item.label }}</h4>
+        }
+      </div>
+    </button>
+  </div>
+}

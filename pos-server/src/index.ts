@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { prisma } from "./db/prisma";
 import productsRouter from "./routes/products";
+import categoriesRouter from "./routes/categories";
 import usersRouter from "./routes/users";
 import ordersRouter from "./routes/orders";
 import inventoryRouter from "./routes/inventory";
@@ -27,6 +28,7 @@ app.get("/health", (req: Request, res: Response) => {
 const apiPrefix = `/api/${process.env.API_VERSION || "v1"}`;
 
 app.use(`${apiPrefix}/products`, productsRouter);
+app.use(`${apiPrefix}/categories`, categoriesRouter);
 app.use(`${apiPrefix}/users`, usersRouter);
 app.use(`${apiPrefix}/orders`, ordersRouter);
 app.use(`${apiPrefix}/inventory`, inventoryRouter);
@@ -39,6 +41,7 @@ app.get("/", (req: Request, res: Response) => {
     endpoints: {
       health: "/health",
       products: `${apiPrefix}/products`,
+      categories: `${apiPrefix}/categories`,
       users: `${apiPrefix}/users`,
       orders: `${apiPrefix}/orders`,
     },

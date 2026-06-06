@@ -1,5 +1,5 @@
 <div class="auth-container">
-  <mat-card class="auth-card" mat-elevation-z8>
+  <mat-card class="auth-card">
     <h2 class="title">☕ Welcome Back</h2>
     <p class="subtitle">Sign in to your account</p>
 
@@ -20,20 +20,15 @@
       <!-- PASSWORD -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Password</mat-label>
-
         <input matInput type="password" placeholder="••••••••" [formField]="loginForm.password" />
-
         <mat-icon matPrefix>lock</mat-icon>
-
         @if (loginForm.password().touched() && loginForm.password().invalid()) {
           <mat-error>{{ loginForm.password().errors()[0].message }}</mat-error>
         }
       </mat-form-field>
 
       <!-- BUTTON -->
-      <button mat-raised-button color="primary" class="full-width login-btn" type="submit">
-        Login
-      </button>
+      <button matButton="filled" class="full-width" type="submit">Login</button>
     </form>
 
     <p class="footer-text">

@@ -1,19 +1,16 @@
-
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
-@use "material-symbols/outlined.css";
+@use 'material-symbols/outlined.css';
 @use '@angular/material' as mat;
-@use "theme-colors.scss";
-
-
+@use 'theme-colors.scss';
 
 body {
   margin: 0;
   padding: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 html,
@@ -22,8 +19,9 @@ body {
 }
 
 :root {
-  @include mat.sidenav-overrides((
-    content-background-color: var(--sys-surface-container-lowest),
-  
-  ));
+  @include mat.sidenav-overrides(
+    (
+      content-background-color: var(--sys-surface-container-lowest),
+    )
+  );
 }

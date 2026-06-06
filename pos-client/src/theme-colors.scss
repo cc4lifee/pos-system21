@@ -131,7 +131,7 @@ $_palettes: (
 $_rest: (
   secondary: map.get($_palettes, secondary),
   neutral: map.get($_palettes, neutral),
-  neutral-variant: map.get($_palettes,  neutral-variant),
+  neutral-variant: map.get($_palettes, neutral-variant),
   error: map.get($_palettes, error),
 );
 
@@ -181,7 +181,6 @@ html {
     )
   );
 }
-
 
 .title-small {
   font: mat.get-theme-typography($light-theme, title-small, font);
@@ -393,7 +392,6 @@ button[mat-stroked-button].secondary-button {
   background-color: mat.get-theme-color($light-theme, surface-container-lowest);
 }
 
-
 .surface-container-color {
   &.background-color {
     background-color: mat.get-theme-color($light-theme, surface-container);
@@ -401,8 +399,8 @@ button[mat-stroked-button].secondary-button {
 }
 
 .background {
-    background-color: mat.get-theme-color($light-theme, background);
-  }
+  background-color: mat.get-theme-color($light-theme, background);
+}
 
 .primary-color-button {
   background-color: mat.get-theme-color($light-theme, primary);

@@ -64,7 +64,7 @@ router.post("/", async (req: Request, res: Response) => {
 // UPDATE product
 router.put("/:id", async (req: Request, res: Response) => {
   try {
-    const { name, description, price, cost, quantity, category, isActive } =
+    const { name, description, price, cost, quantity, categoryId, isActive } =
       req.body;
 
     const product = await prisma.product.update({
@@ -72,10 +72,10 @@ router.put("/:id", async (req: Request, res: Response) => {
       data: {
         ...(name && { name }),
         ...(description && { description }),
-        ...(price && { price: parseFloat(price) }),
-        ...(cost && { cost: parseFloat(cost) }),
+        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(cost !== undefined && { cost: parseFloat(cost) }),
         ...(quantity !== undefined && { quantity: parseInt(quantity) }),
-        ...(category && { category }),
+        ...(categoryId !== undefined && { categoryId }),
         ...(isActive !== undefined && { isActive }),
       },
     });

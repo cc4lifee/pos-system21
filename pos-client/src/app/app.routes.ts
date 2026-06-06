@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { ColorPalette } from './shared/components/color-palette/color-palette';
+import { MainLayout } from './layout/main-layout/main-layout';
 
 export const routes: Routes = [
   {
@@ -11,11 +12,23 @@ export const routes: Routes = [
   },
 
   {
-    path: 'dashboard',
-    loadChildren: () => import('./dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
+    path: '',
+    component: MainLayout,
+    children: [
+      {
+        path: 'management',
+        loadChildren: () =>
+          import('./management/management.routes').then((m) => m.managementRoutes),
+      },
+      {
+        path: 'register',
+        loadChildren: () => import('./register/register.routes').then((m) => m.registerRoutes),
+      },
+    ],
+
     // canMatch: [AuthGuard],
   },
 
   // Redirect any unknown paths to the dashboard
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'management/dashboard' },
 ];
