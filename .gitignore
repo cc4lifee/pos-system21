@@ -1,0 +1,58 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+dist/
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Angular
+.angular/cache/
+/out-tsc
+/bazel-out
+
+# Sass
+.sass-cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build and test
+/coverage
+testem.log
+/tmp
+__screenshots__/
+
+# Prisma
+.prisma/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+/connect.lock
+/libpeerconnection.log
+*.sublime-workspace
+.c9/
+.project
+.classpath
+.settings/
+*.launch
