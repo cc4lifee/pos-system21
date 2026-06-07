@@ -1,7 +1,27 @@
 import { Router, Request, Response } from "express";
+import bcrypt from "bcryptjs";
 import { prisma } from "../db/prisma";
+import { authMiddleware, adminMiddleware } from "../middleware/auth";
 
 const router = Router();
+router.use(authMiddleware);
+const DEFAULT_ROLE_NAME = "CASHIER";
+const SALT_ROUNDS = 10;
+
+async function resolveRoleId(roleId?: string, roleName?: string) {
+  if (roleId) {
+    return roleId;
+  }
+
+  const name = roleName?.toString().toUpperCase() || DEFAULT_ROLE_NAME;
+  const role = await prisma.role.findUnique({ where: { name } });
+
+  if (!role) {
+    throw new Error(`Role not found: ${name}`);
+  }
+
+  return role.id;
+}
 
 // GET all users
 router.get("/", async (req: Request, res: Response) => {
@@ -46,21 +66,23 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // CREATE user
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", adminMiddleware, async (req: Request, res: Response) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, roleId, role } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // TODO: Hash password with bcrypt
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const resolvedRoleId = await resolveRoleId(roleId, role);
+
     const user = await prisma.user.create({
       data: {
         email,
-        password, // WARNING: Never store plain text passwords
+        password: hashedPassword,
         name,
-        role: role || "CASHIER",
+        roleId: resolvedRoleId,
       },
       select: {
         id: true,
@@ -74,22 +96,32 @@ router.post("/", async (req: Request, res: Response) => {
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Email already exists" });
     }
+
+    if (error.message?.startsWith("Role not found")) {
+      return res.status(400).json({ error: error.message });
+    }
+
     res.status(500).json({ error: "Failed to create user" });
   }
 });
 
 // UPDATE user
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", adminMiddleware, async (req: Request, res: Response) => {
   try {
-    const { name, role, isActive } = req.body;
+    const { name, roleId, role, isActive } = req.body;
+
+    const data: any = {
+      ...(name && { name }),
+      ...(isActive !== undefined && { isActive }),
+    };
+
+    if (roleId || role) {
+      data.roleId = await resolveRoleId(roleId, role);
+    }
 
     const user = await prisma.user.update({
       where: { id: req.params.id },
-      data: {
-        ...(name && { name }),
-        ...(role && { role }),
-        ...(isActive !== undefined && { isActive }),
-      },
+      data,
       select: {
         id: true,
         email: true,
@@ -103,6 +135,11 @@ router.put("/:id", async (req: Request, res: Response) => {
     if (error.code === "P2025") {
       return res.status(404).json({ error: "User not found" });
     }
+
+    if (error.message?.startsWith("Role not found")) {
+      return res.status(400).json({ error: error.message });
+    }
+
     res.status(500).json({ error: "Failed to update user" });
   }
 });

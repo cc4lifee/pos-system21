@@ -22,7 +22,6 @@ interface LoginData {
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
-    RouterLink,
   ],
 
   templateUrl: './login.html',

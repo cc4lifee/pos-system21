@@ -1,7 +1,11 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../db/prisma";
+import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
+router.use(authMiddleware);
+
+const VALID_PAYMENT_METHODS = ["CASH", "CARD", "TRANSFER"] as const;
 
 // GET all orders
 router.get("/", async (req: Request, res: Response) => {
@@ -61,6 +65,16 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const paymentMethodValue = paymentMethod
+      ? paymentMethod.toString().toUpperCase()
+      : "CASH";
+
+    if (!VALID_PAYMENT_METHODS.includes(paymentMethodValue as any)) {
+      return res.status(400).json({
+        error: `Invalid paymentMethod. Allowed values are: ${VALID_PAYMENT_METHODS.join(", ")}`,
+      });
+    }
+
     // Generate order number
     const orderNumber = `ORD-${Date.now()}`;
 
@@ -91,7 +105,7 @@ router.post("/", async (req: Request, res: Response) => {
           orderNumber,
           userId,
           total: parseFloat(total),
-          paymentMethod: paymentMethod || "CASH",
+          paymentMethod: paymentMethodValue,
           notes,
           items: {
             create: items.map((item: any) => ({

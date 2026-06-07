@@ -1,6 +1,8 @@
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const SALT_ROUNDS = 10;
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -27,7 +29,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       email: "admin@posystem.com",
-      password: "admin123", // TODO: hash in production
+      password: await bcrypt.hash("admin123", SALT_ROUNDS),
       name: "Admin User",
       roleId: roleAdmin.id,
     },
@@ -36,7 +38,7 @@ async function main() {
   const cashier1 = await prisma.user.create({
     data: {
       email: "cashier1@posystem.com",
-      password: "cashier123",
+      password: await bcrypt.hash("cashier123", SALT_ROUNDS),
       name: "Juan Pérez",
       roleId: roleCashier.id,
     },
@@ -45,7 +47,7 @@ async function main() {
   const cashier2 = await prisma.user.create({
     data: {
       email: "cashier2@posystem.com",
-      password: "cashier123",
+      password: await bcrypt.hash("cashier123", SALT_ROUNDS),
       name: "María García",
       roleId: roleCashier.id,
     },

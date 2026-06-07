@@ -1,13 +1,15 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../db/prisma";
+import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
+router.use(authMiddleware);
 
 // POST /api/v1/inventory/adjust
 router.post("/adjust", async (req: Request, res: Response) => {
   try {
     const { productId, newQuantity, reason, type } = req.body;
-    const userId = req.body.userId || null; // in real app, take from auth middleware
+    const userId = req.user?.userId || null;
 
     if (!productId || typeof newQuantity !== "number") {
       return res

@@ -5,6 +5,7 @@ import { prisma } from "./db/prisma";
 import productsRouter from "./routes/products";
 import categoriesRouter from "./routes/categories";
 import usersRouter from "./routes/users";
+import authRouter from "./routes/auth";
 import ordersRouter from "./routes/orders";
 import inventoryRouter from "./routes/inventory";
 
@@ -29,6 +30,7 @@ const apiPrefix = `/api/${process.env.API_VERSION || "v1"}`;
 
 app.use(`${apiPrefix}/products`, productsRouter);
 app.use(`${apiPrefix}/categories`, categoriesRouter);
+app.use(`${apiPrefix}/auth`, authRouter);
 app.use(`${apiPrefix}/users`, usersRouter);
 app.use(`${apiPrefix}/orders`, ordersRouter);
 app.use(`${apiPrefix}/inventory`, inventoryRouter);

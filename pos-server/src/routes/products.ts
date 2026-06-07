@@ -1,7 +1,9 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../db/prisma";
+import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
+router.use(authMiddleware);
 
 // GET all products
 router.get("/", async (req: Request, res: Response) => {

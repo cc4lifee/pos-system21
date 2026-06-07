@@ -8,7 +8,7 @@ export const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('./auth/auth.routes').then((m) => m.authRoutes),
     // canMatch: [AuthGuard],
-    data: { requireAuth: false },
+    // data: { requireAuth: false },
   },
 
   {
@@ -24,11 +24,9 @@ export const routes: Routes = [
         path: 'register',
         loadChildren: () => import('./register/register.routes').then((m) => m.registerRoutes),
       },
+      { path: '', redirectTo: 'management', pathMatch: 'full' },
     ],
 
     // canMatch: [AuthGuard],
   },
-
-  // Redirect any unknown paths to the dashboard
-  { path: '**', redirectTo: 'management/dashboard' },
 ];
