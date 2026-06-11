@@ -8,6 +8,7 @@ import usersRouter from "./routes/users";
 import authRouter from "./routes/auth";
 import ordersRouter from "./routes/orders";
 import inventoryRouter from "./routes/inventory";
+import promotionsRouter from "./routes/promotions";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(`${apiPrefix}/categories`, categoriesRouter);
 app.use(`${apiPrefix}/auth`, authRouter);
 app.use(`${apiPrefix}/users`, usersRouter);
 app.use(`${apiPrefix}/orders`, ordersRouter);
+app.use(`${apiPrefix}/promotions`, promotionsRouter);
 app.use(`${apiPrefix}/inventory`, inventoryRouter);
 
 // Root endpoint

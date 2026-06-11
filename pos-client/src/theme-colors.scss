@@ -197,6 +197,9 @@ html {
   &.outline-color {
     color: mat.get-theme-color($light-theme, outline);
   }
+  &.on-surface-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
   font-weight: 600;
 }
 
@@ -218,8 +221,15 @@ html {
   &.outline-color {
     color: mat.get-theme-color($light-theme, outline);
   }
-
-  font-weight: 600;
+  &.on-surface-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
+  &.font-weight-500 {
+    font-weight: 500;
+  }
+  &.font-weight-600 {
+    font-weight: 600;
+  }
 }
 
 .title-large {
@@ -228,28 +238,23 @@ html {
   &.shadow {
     color: mat.get-theme-color($light-theme, shadow);
   }
-  font-weight: 500;
-}
-
-.display-large {
-  font: mat.get-theme-typography($light-theme, display-large, font);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
+  &.on-primary-color {
+    color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-background-color {
+    color: mat.get-theme-color($light-theme, on-background);
+  }
+  &.font-weight-500 {
+    font-weight: 500;
   }
 }
 
-.display-medium {
-  font: mat.get-theme-typography($light-theme, display-medium, font);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
-  }
+.headline-large {
+  font: mat.get-theme-typography($light-theme, headline-large, font);
 }
 
-.display-small {
-  font: mat.get-theme-typography($light-theme, display-small, font);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
-  }
+.headline-medium {
+  font: mat.get-theme-typography($light-theme, headline-medium, font);
 }
 
 .headline-small {
@@ -260,7 +265,9 @@ html {
   &.on-surface-color {
     color: mat.get-theme-color($light-theme, on-surface);
   }
-  font-weight: 600;
+  &.font-weight-600 {
+    font-weight: 600;
+  }
 }
 
 .headline-small-400 {
@@ -268,61 +275,21 @@ html {
   &.primary-color {
     color: mat.get-theme-color($light-theme, primary);
   }
-  font-weight: 400;
-}
-
-.title-medium {
-  font: mat.get-theme-typography($light-theme, title-medium, font);
-  font-weight: 600;
-  color: mat.get-theme-color($light-theme, primary);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
-  }
-  &.on-primary-container-color {
-    color: mat.get-theme-color($light-theme, on-primary-container);
-  }
-  &.secondary-color {
-    color: mat.get-theme-color($light-theme, secondary);
-  }
-  &.outline-color {
-    color: mat.get-theme-color($light-theme, outline);
-  }
-  &.on-surface-color {
-    color: mat.get-theme-color($light-theme, on-surface);
-  }
-  &.font-weight-500 {
-    font-weight: 500;
+  &.font-weight-400 {
+    font-weight: 400;
   }
 }
 
-.title-small {
-  font: mat.get-theme-typography($light-theme, title-small, font);
-  color: mat.get-theme-color($light-theme, primary);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
-  }
-  &.on-primary-container-color {
-    color: mat.get-theme-color($light-theme, on-primary-container);
-  }
-  &.secondary-color {
-    color: mat.get-theme-color($light-theme, secondary);
-  }
-  &.outline-color {
-    color: mat.get-theme-color($light-theme, outline);
-  }
+.display-large {
+  font: mat.get-theme-typography($light-theme, display-large, font);
 }
 
-.body-medium {
-  font: mat.get-theme-typography($light-theme, body-medium, font);
-  &.on-primary-color {
-    color: mat.get-theme-color($light-theme, on-primary);
-  }
-  &.on-background-color {
-    color: mat.get-theme-color($light-theme, on-background);
-  }
-  &.font-weight-700 {
-    font-weight: 700;
-  }
+.display-medium {
+  font: mat.get-theme-typography($light-theme, display-medium, font);
+}
+
+.display-small {
+  font: mat.get-theme-typography($light-theme, display-small, font);
 }
 
 .body-large {
@@ -341,20 +308,198 @@ html {
   }
 }
 
-.label-medium {
-  font: mat.get-theme-typography($light-theme, label-medium, font);
-  // &.on-primary-color {
-  //   color: mat.get-theme-color($light-theme, on-primary);
-  // }
-  // &.on-background-color {
-  //   color: mat.get-theme-color($light-theme, on-background);
-  // }
+.body-medium {
+  font: mat.get-theme-typography($light-theme, body-medium, font);
+  &.on-primary-color {
+    color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-background-color {
+    color: mat.get-theme-color($light-theme, on-background);
+  }
   &.font-weight-700 {
     font-weight: 700;
   }
 }
 
+.body-small {
+  font: mat.get-theme-typography($light-theme, body-small, font);
+  &.on-primary-color {
+    color: mat.get-theme-color($light-theme, on-primary);
+  }
+  &.on-background-color {
+    color: mat.get-theme-color($light-theme, on-background);
+  }
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+.label-large {
+  font: mat.get-theme-typography($light-theme, label-large, font);
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+.label-medium {
+  font: mat.get-theme-typography($light-theme, label-medium, font);
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+.label-small {
+  font: mat.get-theme-typography($light-theme, label-small, font);
+  &.font-weight-700 {
+    font-weight: 700;
+  }
+}
+
+// Color Utility Classes
+
+.text-primary {
+  color: mat.get-theme-color($light-theme, primary);
+}
+
+.text-secondary {
+  color: mat.get-theme-color($light-theme, secondary);
+}
+
+.text-tertiary {
+  color: mat.get-theme-color($light-theme, tertiary);
+}
+
+.text-on-primary {
+  color: mat.get-theme-color($light-theme, on-primary);
+}
+
+.text-on-secondary {
+  color: mat.get-theme-color($light-theme, on-secondary);
+}
+
+.text-on-tertiary {
+  color: mat.get-theme-color($light-theme, on-tertiary);
+}
+
+.text-on-surface {
+  color: mat.get-theme-color($light-theme, on-surface);
+}
+
+.text-on-background {
+  color: mat.get-theme-color($light-theme, on-background);
+}
+
+.text-error {
+  color: mat.get-theme-color($light-theme, error);
+}
+
+// Background Utility Classes
+.bg-primary {
+  background-color: mat.get-theme-color($light-theme, primary);
+}
+
+.bg-secondary {
+  background-color: mat.get-theme-color($light-theme, secondary);
+}
+
+.bg-tertiary {
+  background-color: mat.get-theme-color($light-theme, tertiary);
+}
+
+.bg-primary-container {
+  background-color: mat.get-theme-color($light-theme, primary-container);
+}
+
+.bg-secondary-container {
+  background-color: mat.get-theme-color($light-theme, secondary-container);
+}
+
+.bg-tertiary-container {
+  background-color: mat.get-theme-color($light-theme, tertiary-container);
+}
+
+.bg-surface {
+  background-color: mat.get-theme-color($light-theme, surface);
+}
+
+.bg-surface-container {
+  background-color: mat.get-theme-color($light-theme, surface-container);
+}
+
+.bg-surface-container-high {
+  background-color: mat.get-theme-color($light-theme, surface-container-high);
+}
+
+.bg-surface-container-highest {
+  background-color: mat.get-theme-color($light-theme, surface-container-highest);
+}
+
+.bg-surface-container-low {
+  background-color: mat.get-theme-color($light-theme, surface-container-low);
+}
+
+.bg-surface-container-lowest {
+  background-color: mat.get-theme-color($light-theme, surface-container-lowest);
+}
+
+.bg-surface-variant {
+  background-color: mat.get-theme-color($light-theme, surface-variant);
+}
+
+.bg-background {
+  background-color: mat.get-theme-color($light-theme, background);
+}
+
+.bg-error {
+  background-color: mat.get-theme-color($light-theme, error);
+}
+
+.bg-error-container {
+  background-color: mat.get-theme-color($light-theme, error-container);
+}
+
+.bg-on-primary {
+  background-color: mat.get-theme-color($light-theme, on-primary);
+}
+
+.bg-on-secondary {
+  background-color: mat.get-theme-color($light-theme, on-secondary);
+}
+
+.bg-on-tertiary {
+  background-color: mat.get-theme-color($light-theme, on-tertiary);
+}
+
+.bg-on-surface {
+  background-color: mat.get-theme-color($light-theme, on-surface);
+}
+
+.bg-on-background {
+  background-color: mat.get-theme-color($light-theme, on-background);
+}
+
+.bg-outline {
+  background-color: mat.get-theme-color($light-theme, outline);
+}
+
+.bg-inverse-surface {
+  background-color: mat.get-theme-color($light-theme, inverse-surface);
+}
+
+.bg-inverse-on-surface {
+  background-color: mat.get-theme-color($light-theme, inverse-on-surface);
+}
+
+.bg-scrim {
+  background-color: mat.get-theme-color($light-theme, scrim);
+}
+
+.bg-shadow {
+  background-color: mat.get-theme-color($light-theme, shadow);
+}
+
 // <button mat-raised-button class="primary-button">
+//TODO: Esto cambia los botones que son mat-raised-button? O solo los que tienen la clase primary-button?
 button[mat-raised-button].primary-button {
   background-color: mat.get-theme-color($light-theme, primary);
   color: mat.get-theme-color($light-theme, on-primary);
@@ -372,48 +517,6 @@ button[mat-stroked-button].secondary-button {
   color: mat.get-theme-color($light-theme, on-surface);
 }
 
-.primary-color {
-  color: mat.get-theme-color($light-theme, primary);
-}
-
-.secondary-color {
-  color: mat.get-theme-color($light-theme, secondary);
-}
-
-.inverse-on-surface {
-  background-color: mat.get-theme-color($light-theme, inverse-on-surface);
-}
-
-.surface-container-high {
-  background-color: mat.get-theme-color($light-theme, surface-container-high);
-}
-
-.surface-container-lowest {
-  background-color: mat.get-theme-color($light-theme, surface-container-lowest);
-}
-
-.surface-container-color {
-  &.background-color {
-    background-color: mat.get-theme-color($light-theme, surface-container);
-  }
-}
-
-.background {
-  background-color: mat.get-theme-color($light-theme, background);
-}
-
-.primary-color-button {
-  background-color: mat.get-theme-color($light-theme, primary);
-  color: #fff;
-  width: 80px;
-  height: 30px;
-  border-radius: 5px;
-}
-
-.active {
-  border-bottom: 0.4rem solid mat.get-theme-color($light-theme, primary);
-}
-
 div.chip-list-container {
   &.surface-container {
     background-color: mat.get-theme-color($light-theme, surface-container);
@@ -424,10 +527,6 @@ div.chip-list-container {
   &.secondary-fixed-dim {
     background-color: mat.get-theme-color($light-theme, secondary-fixed-dim);
   }
-}
-
-.custom-tooltip-box {
-  background-color: mat.get-theme-color($light-theme, on-primary-container);
 }
 
 /* Color Palette Container */

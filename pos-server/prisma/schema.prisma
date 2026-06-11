@@ -37,6 +37,20 @@ model Role {
   @@map("roles")
 }
 
+model Promotion {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("promotions")
+}
+
 // Products
 model Category {
   id        String   @id @default(cuid())
@@ -67,6 +81,7 @@ model Product {
   orderItems            OrderItem[]
   inventoryTransactions InventoryTransaction[]
 
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -86,6 +101,7 @@ model Order {
   items    OrderItem[]
   payments Payment[]
 
+  @@index([userId])
   @@map("orders")
 }
 
@@ -128,21 +144,27 @@ model InventoryTransaction {
   createdAt      DateTime      @default(now())
 
   @@index([productId, createdAt])
+  @@index([userId])
   @@map("inventory_transactions")
 }
 
 // Order Items
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  unitPrice Float
-  subtotal  Float
-  discount  Float   @default(0)
+  id          String     @id @default(cuid())
+  orderId     String
+  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product    @relation(fields: [productId], references: [id])
+  promotionId String?
+  promotion   Promotion? @relation(fields: [promotionId], references: [id])
+  quantity    Int
+  unitPrice   Float
+  subtotal    Float
+  discount    Float      @default(0)
 
+  @@index([orderId])
+  @@index([productId])
+  @@index([promotionId])
   @@map("order_items")
 }
 
@@ -164,5 +186,6 @@ model Payment {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
+  @@index([orderId])
   @@map("payments")
 }

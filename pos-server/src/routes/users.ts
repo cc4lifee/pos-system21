@@ -24,7 +24,7 @@ async function resolveRoleId(roleId?: string, roleName?: string) {
 }
 
 // GET all users
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", adminMiddleware, async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -45,6 +45,13 @@ router.get("/", async (req: Request, res: Response) => {
 // GET user by ID
 router.get("/:id", async (req: Request, res: Response) => {
   try {
+    const tokenUser = req.user;
+    if (!tokenUser) return res.status(401).json({ error: "Unauthorized" });
+
+    // only admin or the owner can fetch a specific user
+    if (tokenUser.roleName !== "ADMIN" && tokenUser.userId !== req.params.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     const user = await prisma.user.findUnique({
       where: { id: req.params.id },
       select: {

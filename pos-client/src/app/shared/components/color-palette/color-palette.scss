@@ -29,3 +29,17 @@
   }
 }
 
+div.button-examples > section {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+
+  .example-label {
+    margin-bottom: 1rem;
+  }
+
+  .example-button-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+}

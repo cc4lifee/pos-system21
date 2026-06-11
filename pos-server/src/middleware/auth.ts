@@ -54,14 +54,13 @@ export const authMiddleware = (
   }
 };
 
-export const adminMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  if (!req.user || req.user.roleName !== "ADMIN") {
-    return res.status(403).json({ error: "Admin privileges required" });
-  }
+export const requireRole =
+  (...roles: string[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user || !roles.includes(req.user.roleName)) {
+      return res.status(403).json({ error: "Insufficient privileges" });
+    }
+    next();
+  };
 
-  next();
-};
+export const adminMiddleware = requireRole("ADMIN");

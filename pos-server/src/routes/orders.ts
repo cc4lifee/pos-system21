@@ -5,7 +5,20 @@ import { authMiddleware } from "../middleware/auth";
 const router = Router();
 router.use(authMiddleware);
 
-const VALID_PAYMENT_METHODS = ["CASH", "CARD", "TRANSFER"] as const;
+const VALID_PAYMENT_METHODS = ["CASH", "CARD", "TRANSFER", "CHECK"] as const;
+const VALID_ORDER_STATUS = [
+  "PENDING",
+  "COMPLETED",
+  "CANCELLED",
+  "REFUNDED",
+] as const;
+
+const toUpperString = (value: any) => value?.toString().trim().toUpperCase();
+
+const isValidPositiveNumber = (value: any) =>
+  typeof value === "number" && !Number.isNaN(value) && value >= 0;
+
+class BadRequestError extends Error {}
 
 // GET all orders
 router.get("/", async (req: Request, res: Response) => {
@@ -20,6 +33,7 @@ router.get("/", async (req: Request, res: Response) => {
             product: {
               select: { id: true, name: true },
             },
+            promotion: true,
           },
         },
       },
@@ -43,6 +57,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         items: {
           include: {
             product: true,
+            promotion: true,
           },
         },
       },
@@ -61,18 +76,66 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const { userId, total, paymentMethod, notes, items } = req.body;
 
-    if (!userId || !total || !items || items.length === 0) {
-      return res.status(400).json({ error: "Missing required fields" });
+    if (!userId || !items || !Array.isArray(items) || items.length === 0) {
+      throw new BadRequestError(
+        "Missing required fields: userId and items are required",
+      );
     }
 
+    if (!isValidPositiveNumber(total)) {
+      throw new BadRequestError("Total must be a non-negative number");
+    }
+
+    const parsedItems = items.map((item: any, index: number) => {
+      const quantity = Number(item.quantity);
+      const unitPrice = Number(item.unitPrice);
+      const subtotal = Number(item.subtotal);
+      const discount = item.discount !== undefined ? Number(item.discount) : 0;
+      const promotionId = item.promotionId
+        ? item.promotionId.toString()
+        : undefined;
+
+      if (
+        !Number.isInteger(quantity) ||
+        quantity <= 0 ||
+        !isValidPositiveNumber(unitPrice) ||
+        !isValidPositiveNumber(subtotal) ||
+        discount < 0
+      ) {
+        throw new BadRequestError(
+          `Invalid item data at index ${index}: quantity, unitPrice, subtotal and discount must be valid numbers`,
+        );
+      }
+
+      return {
+        productId: item.productId,
+        quantity,
+        unitPrice,
+        subtotal,
+        discount,
+        promotionId,
+      };
+    });
+
     const paymentMethodValue = paymentMethod
-      ? paymentMethod.toString().toUpperCase()
+      ? toUpperString(paymentMethod)
       : "CASH";
 
     if (!VALID_PAYMENT_METHODS.includes(paymentMethodValue as any)) {
-      return res.status(400).json({
-        error: `Invalid paymentMethod. Allowed values are: ${VALID_PAYMENT_METHODS.join(", ")}`,
-      });
+      throw new BadRequestError(
+        `Invalid paymentMethod. Allowed values are: ${VALID_PAYMENT_METHODS.join(", ")}`,
+      );
+    }
+
+    const itemSubtotalSum = parsedItems.reduce(
+      (sum, item) => sum + item.subtotal,
+      0,
+    );
+
+    if (Math.abs(Number(total) - itemSubtotalSum) > 0.01) {
+      throw new BadRequestError(
+        "Order total must match the sum of item subtotals",
+      );
     }
 
     // Generate order number
@@ -87,15 +150,31 @@ router.post("/", async (req: Request, res: Response) => {
 
       // Ensure all products exist
       if (dbProducts.length !== new Set(productIds).size) {
-        throw new Error("One or more products not found");
+        throw new BadRequestError("One or more products not found");
       }
 
       // Validate stock for products that track inventory
-      for (const item of items) {
+      for (const item of parsedItems) {
         const prod = dbProducts.find((p) => p.id === item.productId)!;
-        const qty = parseInt(item.quantity);
-        if (prod.trackInventory && prod.quantity < qty) {
-          throw new Error(`Insufficient stock for product: ${prod.name}`);
+        if (prod.trackInventory && prod.quantity < item.quantity) {
+          throw new BadRequestError(
+            `Insufficient stock for product: ${prod.name}`,
+          );
+        }
+      }
+
+      // Validate promotions if referenced
+      const promotionIds = parsedItems
+        .map((item: any) => item.promotionId)
+        .filter(Boolean);
+
+      if (promotionIds.length > 0) {
+        const promotions = await tx.promotion.findMany({
+          where: { id: { in: promotionIds } },
+        });
+
+        if (promotions.length !== new Set(promotionIds).size) {
+          throw new BadRequestError("One or more promotions not found");
         }
       }
 
@@ -104,22 +183,23 @@ router.post("/", async (req: Request, res: Response) => {
         data: {
           orderNumber,
           userId,
-          total: parseFloat(total),
+          total: Number(total),
           paymentMethod: paymentMethodValue,
           notes,
           items: {
-            create: items.map((item: any) => ({
+            create: parsedItems.map((item: any) => ({
               productId: item.productId,
-              quantity: parseInt(item.quantity),
-              unitPrice: parseFloat(item.unitPrice),
-              subtotal: parseFloat(item.subtotal),
-              discount: item.discount ? parseFloat(item.discount) : 0,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              subtotal: item.subtotal,
+              discount: item.discount,
+              promotionId: item.promotionId,
             })),
           },
         },
         include: {
           items: {
-            include: { product: true },
+            include: { product: true, promotion: true },
           },
           user: { select: { id: true, name: true } },
         },
@@ -141,8 +221,11 @@ router.post("/", async (req: Request, res: Response) => {
     });
 
     res.status(201).json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+    if (error instanceof BadRequestError) {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: "Failed to create order" });
   }
 });
@@ -156,9 +239,16 @@ router.patch("/:id/status", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Status is required" });
     }
 
+    const statusValue = toUpperString(status);
+    if (!VALID_ORDER_STATUS.includes(statusValue as any)) {
+      return res.status(400).json({
+        error: `Invalid status. Allowed values are: ${VALID_ORDER_STATUS.join(", ")}`,
+      });
+    }
+
     const order = await prisma.order.update({
       where: { id: req.params.id },
-      data: { status },
+      data: { status: statusValue as any },
       include: {
         items: true,
         user: {

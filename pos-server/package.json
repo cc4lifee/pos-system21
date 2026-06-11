@@ -14,6 +14,7 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "db:add-constraints": "tsx prisma/add_constraints.ts",
     "lint": "eslint src --ext .ts"
   },
   "keywords": [
