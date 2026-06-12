@@ -268,13 +268,6 @@ html {
   &.font-weight-600 {
     font-weight: 600;
   }
-}
-
-.headline-small-400 {
-  font: mat.get-theme-typography($light-theme, headline-small, font);
-  &.primary-color {
-    color: mat.get-theme-color($light-theme, primary);
-  }
   &.font-weight-400 {
     font-weight: 400;
   }
@@ -346,6 +339,12 @@ html {
   &.font-weight-700 {
     font-weight: 700;
   }
+  &.font-weight-600 {
+    font-weight: 600;
+  }
+  &.font-weight-500 {
+    font-weight: 500;
+  }
 }
 
 .label-small {
@@ -381,8 +380,24 @@ html {
   color: mat.get-theme-color($light-theme, on-tertiary);
 }
 
+.text-surface-tint {
+  color: mat.get-theme-color($light-theme, surface-tint);
+}
+
+.text-surface-dim {
+  color: mat.get-theme-color($light-theme, surface-dim);
+}
+
 .text-on-surface {
   color: mat.get-theme-color($light-theme, on-surface);
+}
+
+.text-on-surface-variant {
+  color: mat.get-theme-color($light-theme, on-surface-variant);
+}
+
+.text-inverse-surface {
+  color: mat.get-theme-color($light-theme, inverse-surface);
 }
 
 .text-on-background {

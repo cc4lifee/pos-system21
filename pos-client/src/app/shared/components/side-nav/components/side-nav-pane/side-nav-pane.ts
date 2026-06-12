@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, effect, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MatSidenavModule, MatDrawerContainer, MatDrawer } from '@angular/material/sidenav';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SideNavService } from '../../services/side-nav.service';
 import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
+import { Header } from '../../../header/header';
 
 @Component({
   selector: 'app-side-nav-pane',
@@ -18,6 +19,7 @@ import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
     MatDividerModule,
     MatIconModule,
     RouterModule,
+    Header,
     SideNavMenuItems,
   ],
   templateUrl: './side-nav-pane.html',

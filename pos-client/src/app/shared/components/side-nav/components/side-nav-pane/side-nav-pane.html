@@ -11,7 +11,7 @@
           <h3>POS System</h3>
         }
 
-        <button mat-icon-button (click)="sideNav.toggleDesktopMinimize()">
+        <button matIconButton (click)="sideNav.toggleDesktopMinimize()">
           <mat-icon>
             {{ sideNav.isMinimized() ? 'chevron_right' : 'chevron_left' }}
           </mat-icon>
@@ -39,11 +39,12 @@
   <mat-drawer-content>
     <!-- MOBILE BUTTON -->
     @if (sideNav.isMobile()) {
-      <button mat-icon-button (click)="sideNav.toggleMobileDrawer()">
+      <button matIconButton (click)="sideNav.toggleMobileDrawer()">
         <mat-icon>menu</mat-icon>
       </button>
     }
 
+    <app-header />
     <router-outlet />
   </mat-drawer-content>
 </mat-drawer-container>

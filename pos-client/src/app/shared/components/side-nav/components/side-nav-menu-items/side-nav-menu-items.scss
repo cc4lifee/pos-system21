@@ -1,23 +1,10 @@
-label {
-  color: var(--sys-on-surface);
-  cursor: pointer;
-}
-
-.minimized label {
-  display: block;
-  white-space: nowrap;
-  max-width: 4rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .minimized {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   flex-direction: column;
 }
 
 .material-symbols-outlined {
-  color: var(--sys-on-surface);
+  font-size: 1.25rem;
 }
 
 div {
@@ -25,17 +12,17 @@ div {
   align-items: center;
 }
 
-.menu-item {
+.menu-item.maximized {
   justify-content: space-between;
-  padding: 0 0.25rem;
+  padding: 0rem 0.8rem 0rem 0.5rem;
 }
 
-.mouse-pointer {
-  cursor: pointer;
+.menu-item.minimized button {
+  width: 70%;
 }
 
 .maximized button {
-  height: 3rem;
+  height: 2.7rem;
   flex-grow: 1;
   justify-content: flex-start;
 }
@@ -45,50 +32,24 @@ button.active {
 }
 
 .maximized .material-symbols-outlined {
-  padding-left: 0.5rem;
-  padding-right: 1.25rem;
+  padding-right: 0.5rem;
 }
 
-h4 {
-  margin: 0;
-  white-space: nowrap;
-  overflow-x: hidden;
+label > span {
+  display: block;
+  margin-left: 1rem;
 }
 
-.hover-menu {
-  display: none;
-  position: absolute;
-  margin-top: -5rem;
-  right: -12.5rem;
-  width: 12.5rem;
-  flex-direction: column;
-  background-color: var(--sys-surface-container);
-  padding: 0.5rem 0;
-  border-radius: 0.25rem;
+.management {
+  margin-top: 0.6rem;
 }
 
-.hover-menu.maximized {
-  margin-top: -4rem;
+.register,
+.management {
+  margin-bottom: 0.2rem;
 }
 
-.hover-menu button {
-  height: 3rem;
-  padding-left: 1.25rem;
-  width: 100%;
-  border-radius: 0;
-  justify-content: flex-start;
-}
-
-.inline-menu {
-  margin: 0.5rem 2rem 0.5rem 3.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.inline-menu button {
-  width: 100%;
-  justify-content: flex-start;
-  white-space: nowrap;
-  overflow-x: hidden;
+mat-divider {
+  margin: 1rem 1rem 1rem 1rem;
+  border-top-color: var(--sys-outline-variant);
 }

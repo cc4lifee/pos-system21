@@ -11,11 +11,12 @@ import { SideNavService } from '../../services/side-nav.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-side-nav-menu-items',
   standalone: true,
-  imports: [MatButtonModule, RouterModule, MatTooltipModule],
+  imports: [MatButtonModule, RouterModule, MatTooltipModule, MatDividerModule],
   templateUrl: './side-nav-menu-items.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './side-nav-menu-items.scss',
@@ -25,7 +26,7 @@ export class SideNavMenuItems {
   protected readonly active = signal(false);
   @ViewChild('menu') menu?: ElementRef;
 
-  readonly menuItems = [
+  readonly registerItems = [
     { id: 'terminal', route: ['/register/terminal'], icon: 'shopping_cart', label: 'Terminal' },
     {
       id: 'pending-orders',
@@ -33,6 +34,9 @@ export class SideNavMenuItems {
       icon: 'schedule',
       label: 'Pending Orders',
     },
+  ];
+
+  readonly managementItems = [
     {
       id: 'dashboard',
       route: ['/management/dashboard'],

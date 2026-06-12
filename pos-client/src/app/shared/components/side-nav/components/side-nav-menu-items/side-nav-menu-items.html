@@ -1,4 +1,7 @@
-@for (item of menuItems; track item.id) {
+<label>
+  <span class="label-medium font-weight-600 text-surface-tint register">Register</span>
+</label>
+@for (item of registerItems; track item.id) {
   <div
     class="menu-item"
     [class.minimized]="sideNavService.isMinimized()"
@@ -15,9 +18,40 @@
       matButton
     >
       <div>
-        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span class="material-symbols-outlined text-on-surface">{{ item.icon }}</span>
         @if (sideNavService.showLabels()) {
-          <h4 class="title-medium on-surface-color">{{ item.label }}</h4>
+          <span class="label-large text-on-surface">{{ item.label }}</span>
+        }
+      </div>
+    </button>
+  </div>
+}
+
+<mat-divider></mat-divider>
+
+<label>
+  <span class="label-medium font-weight-600 text-surface-tint management">Manage</span>
+</label>
+@for (item of managementItems; track item.id) {
+  <div
+    class="menu-item"
+    [class.minimized]="sideNavService.isMinimized()"
+    [class.maximized]="!sideNavService.isMinimized()"
+    [class.mouse-pointer]="!active() || sideNavService.isMinimized()"
+    (mouseenter)="openMenu()"
+    (mouseleave)="closeMenu()"
+  >
+    <button
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      id="{{ item.id }}"
+      matButton
+    >
+      <div>
+        <span class="material-symbols-outlined text-on-surface">{{ item.icon }}</span>
+        @if (sideNavService.showLabels()) {
+          <span class="label-large text-on-surface">{{ item.label }}</span>
         }
       </div>
     </button>
