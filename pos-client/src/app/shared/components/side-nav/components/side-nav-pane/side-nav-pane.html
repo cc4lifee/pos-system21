@@ -8,7 +8,7 @@
     >
       <div class="drawer-header">
         @if (!sideNav.isMinimized()) {
-          <h3>POS System</h3>
+          <div class="title-large shadow">POS System</div>
         }
 
         <button matIconButton (click)="sideNav.toggleDesktopMinimize()">
@@ -44,7 +44,7 @@
       </button>
     }
 
-    <app-header />
+    <!-- <app-header /> -->
     <router-outlet />
   </mat-drawer-content>
 </mat-drawer-container>

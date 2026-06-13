@@ -19,7 +19,7 @@ import { Header } from '../../../header/header';
     MatDividerModule,
     MatIconModule,
     RouterModule,
-    Header,
+    // Header,
     SideNavMenuItems,
   ],
   templateUrl: './side-nav-pane.html',

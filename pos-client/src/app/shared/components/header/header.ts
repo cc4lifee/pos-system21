@@ -53,6 +53,7 @@ export class Header {
       Ordenes: () => `${this.ordersCount()} | Total revenue $12,345.67`,
       Categorias: () => `${this.categoriesCount()} categorias`,
       Dashboard: () => `Ultimas analíticas y reportes`,
+      'Color Palette': () => ``,
     };
 
     return {

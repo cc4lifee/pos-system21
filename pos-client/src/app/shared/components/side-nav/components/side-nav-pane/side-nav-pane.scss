@@ -28,7 +28,8 @@ mat-drawer.minimized {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.5rem 0rem 0.5rem;
+  padding: 1rem 1rem 0.25rem 1rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ✅ FIX: centro cuando está minimizado */
@@ -50,11 +51,6 @@ mat-drawer-content {
 
 /* ===== ICONOS Y TEXTO ===== */
 mat-icon {
-  color: var(--sys-on-surface);
-}
-
-h3 {
-  margin-left: 0.5rem;
   color: var(--sys-on-surface);
 }
 

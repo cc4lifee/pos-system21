@@ -1,6 +1,8 @@
 <div class="title-large text-on-surface">{{ headerData().title }}</div>
 @if (headerData().subtitle) {
   <label class="label-small text-surface-tint">{{ headerData().subtitle }}</label>
+} @else {
+  <label class="label-small text-surface-tint">-</label>
 }
 
 <mat-divider />

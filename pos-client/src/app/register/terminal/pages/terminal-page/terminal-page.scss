@@ -1,0 +1,13 @@
+.terminal-layout {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  height: 100%;
+}
+
+.catalog-panel {
+  display: flex;
+  flex-direction: column;
+}
+.cart-panel {
+  height: 100%;
+}
