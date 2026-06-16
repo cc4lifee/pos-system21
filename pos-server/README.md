@@ -1,38 +1,48 @@
 # POS System - Backend API
 
-Backend API para el sistema de punto de venta construido con Node.js, Express y Prisma.
+API backend para un sistema de punto de venta (POS). Esta app administra productos,
+categorias, usuarios, roles, ordenes de venta, promociones, pagos e inventario.
 
-## 🚀 Stack Tecnológico
+El servidor esta construido con Node.js, Express, TypeScript y Prisma sobre
+PostgreSQL. Forma parte del monorepo `pos-system21`, junto con el frontend Angular
+ubicado en `../pos-client`.
 
-- **Runtime**: Node.js + TypeScript
-- **Framework**: Express.js
-- **Base de Datos**: PostgreSQL
-- **ORM**: Prisma
-- **Desarrollo**: Docker + Docker Compose
-- **Deploy**: Railway (Backend) + Supabase (Base de Datos)
+## Stack
 
-## 📋 Requisitos
+- Node.js + TypeScript
+- Express
+- PostgreSQL
+- Prisma ORM
+- JWT para autenticacion
+- bcrypt para contrasenas
+- Railway/Supabase como opcion de despliegue
 
-- Node.js 18+
-- Docker y Docker Compose (para desarrollo)
-- npm o yarn
+## Requisitos
 
-## 🛠️ Instalación Local
+- Node.js 18 o superior
+- npm
+- Una base de datos PostgreSQL disponible
 
-### 1. Instalar dependencias
+Nota: este README anterior mencionaba Docker Compose, pero actualmente no existe un
+`docker-compose.yml` en `pos-server`. Si quieres usar Docker localmente, agrega ese
+archivo o configura PostgreSQL por tu cuenta.
+
+## Instalacion local
+
+Desde la raiz del monorepo:
 
 ```bash
 cd pos-server
 npm install
 ```
 
-### 2. Configurar variables de entorno
+Crea el archivo de entorno:
 
 ```bash
 cp .env.example .env
 ```
 
-Edita `.env` con los valores locales (ya debe estar configurado para Docker):
+Ejemplo de variables:
 
 ```env
 DATABASE_URL=postgres://posuser:pospass@localhost:5432/posdb
@@ -40,234 +50,302 @@ NODE_ENV=development
 PORT=3000
 CORS_ORIGIN=http://localhost:4200
 API_VERSION=v1
+JWT_SECRET=pos_system_jwt_secret
+JWT_EXPIRES_IN=1h
 ```
 
-### 3. Levantar PostgreSQL con Docker
-
-```bash
-docker-compose up -d
-```
-
-Verifica la conexión:
-
-```bash
-docker-compose ps
-```
-
-Accede a pgAdmin (web UI para Postgres):
-
-- URL: http://localhost:5050
-- Email: admin@example.com
-- Password: admin
-
-### 4. Crear esquema de base de datos y aplicar migraciones
+Prepara Prisma y la base de datos:
 
 ```bash
 npm run db:generate
 npm run db:migrate
-```
-
-### 5. Seed (datos iniciales)
-
-```bash
 npm run db:seed
 ```
 
-### 6. Iniciar servidor de desarrollo
+Levanta el servidor:
 
 ```bash
 npm run dev
 ```
 
-El servidor estará disponible en `http://localhost:3000`
+La API queda disponible en:
 
-## 📡 Endpoints Principales
-
-### Health Check
-
+```text
+http://localhost:3000
+http://localhost:3000/api/v1
 ```
+
+## Scripts disponibles
+
+```bash
+npm run dev              # Servidor en modo desarrollo con tsx watch
+npm run build            # Compila TypeScript a dist/
+npm start                # Ejecuta dist/index.js
+npm run db:generate      # Genera Prisma Client
+npm run db:migrate       # Ejecuta migraciones en desarrollo
+npm run db:migrate:prod  # Ejecuta migraciones en produccion
+npm run db:push          # Sincroniza schema sin crear migracion
+npm run db:seed          # Inserta datos iniciales
+npm run db:studio        # Abre Prisma Studio
+npm run db:add-constraints
+npm run lint
+```
+
+## Autenticacion
+
+La mayoria de rutas requieren un JWT en el header:
+
+```http
+Authorization: Bearer <token>
+```
+
+El token se obtiene con:
+
+```http
+POST /api/v1/auth/login
+```
+
+Usuarios creados por el seed:
+
+```text
+admin@posystem.com    / admin123    / ADMIN
+cashier1@posystem.com / cashier123  / CASHIER
+cashier2@posystem.com / cashier123  / CASHIER
+```
+
+Algunas rutas requieren roles especificos:
+
+- `ADMIN`: administracion de usuarios y escritura de promociones.
+- `ADMIN`, `MANAGER` o `STOCK`: ajustes de inventario.
+
+## Endpoints
+
+### Health
+
+```http
 GET /health
+GET /
+```
+
+### Auth
+
+```http
+POST /api/v1/auth/login
+GET  /api/v1/auth/me
 ```
 
 ### Productos
 
+```http
+GET    /api/v1/products
+GET    /api/v1/products/:id
+POST   /api/v1/products
+PUT    /api/v1/products/:id
+DELETE /api/v1/products/:id
 ```
-GET    /api/v1/products          # Listar todos
-GET    /api/v1/products/:id      # Obtener uno
-POST   /api/v1/products          # Crear
-PUT    /api/v1/products/:id      # Actualizar
-DELETE /api/v1/products/:id      # Eliminar (soft delete)
+
+`DELETE` no elimina fisicamente el producto: marca `isActive=false`.
+
+### Categorias
+
+```http
+GET    /api/v1/categories
+GET    /api/v1/categories/:id
+POST   /api/v1/categories
+PUT    /api/v1/categories/:id
+DELETE /api/v1/categories/:id
 ```
+
+No se puede eliminar una categoria que tenga productos asignados.
 
 ### Usuarios
 
-```
-GET    /api/v1/users             # Listar todos
-GET    /api/v1/users/:id         # Obtener uno
-POST   /api/v1/users             # Crear
-PUT    /api/v1/users/:id         # Actualizar
-```
-
-### Órdenes
-
-```
-GET    /api/v1/orders            # Listar todas
-GET    /api/v1/orders/:id        # Obtener una
-POST   /api/v1/orders            # Crear
-PATCH  /api/v1/orders/:id/status # Cambiar estado
+```http
+GET  /api/v1/users
+GET  /api/v1/users/:id
+POST /api/v1/users
+PUT  /api/v1/users/:id
 ```
 
-## 🗄️ Estructura de Archivos
+`GET /users`, `POST /users` y `PUT /users/:id` requieren rol `ADMIN`.
+Un usuario no administrador solo puede consultar su propio registro por ID.
 
-```
-pos-server/
-├── src/
-│   ├── index.ts              # Servidor principal
-│   ├── db/
-│   │   └── prisma.ts         # Cliente Prisma (singleton)
-│   ├── routes/
-│   │   ├── products.ts       # Rutas de productos
-│   │   ├── users.ts          # Rutas de usuarios
-│   │   └── orders.ts         # Rutas de órdenes
-│   └── middleware/           # Middlewares personalizados
-├── prisma/
-│   ├── schema.prisma         # Esquema de BD
-│   └── seed.ts               # Script de seed
-├── docker-compose.yml        # Configuración Docker
-├── package.json
-├── tsconfig.json
-└── .env.example
+### Ordenes
+
+```http
+GET   /api/v1/orders
+GET   /api/v1/orders/:id
+POST  /api/v1/orders
+PATCH /api/v1/orders/:id/status
 ```
 
-## 🔄 Flujo de Desarrollo
+Estados permitidos:
 
-### Crear una nueva migración
+```text
+PENDING, COMPLETED, CANCELLED, REFUNDED
+```
 
-Después de editar `prisma/schema.prisma`:
+Metodos de pago permitidos:
+
+```text
+CASH, CARD, CHECK, TRANSFER
+```
+
+Al crear una orden, el backend valida productos, promociones, total y stock. Si un
+producto tiene `trackInventory=true`, la venta descuenta inventario.
+
+### Promociones
+
+```http
+GET  /api/v1/promotions
+GET  /api/v1/promotions/:id
+POST /api/v1/promotions
+PUT  /api/v1/promotions/:id
+```
+
+Crear y actualizar promociones requiere rol `ADMIN`.
+
+### Inventario
+
+```http
+POST /api/v1/inventory/adjust
+GET  /api/v1/inventory/:productId/transactions
+```
+
+`POST /inventory/adjust` actualiza la cantidad de un producto y registra una
+transaccion de inventario con cantidad anterior, cantidad nueva, cambio y motivo.
+
+## Modelo de datos principal
+
+El schema de Prisma esta en `prisma/schema.prisma`.
+
+Entidades principales:
+
+- `User` y `Role`
+- `Product` y `Category`
+- `Order`, `OrderItem` y `Payment`
+- `Promotion`
+- `InventoryTransaction`
+
+Enums principales:
+
+- `OrderStatus`: `PENDING`, `COMPLETED`, `CANCELLED`, `REFUNDED`
+- `PaymentMethod`: `CASH`, `CARD`, `CHECK`, `TRANSFER`
+- `PaymentStatus`: `PENDING`, `COMPLETED`, `FAILED`, `REFUNDED`
+- `InventoryType`: `SALE`, `ADJUSTMENT`, `PURCHASE`, `RETURN`, `SPOILAGE`, `COUNT`
+
+## Ejemplos rapidos
+
+Login:
 
 ```bash
-npm run db:migrate -- --name nombre_migracion
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@posystem.com","password":"admin123"}'
 ```
 
-### Visualizar BD con Prisma Studio
+Crear producto:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/products \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "name": "Latte",
+    "description": "Cafe con leche vaporizada",
+    "price": 3.8,
+    "cost": 1.1,
+    "quantity": 100,
+    "categoryId": "<category-id>"
+  }'
+```
+
+Ajustar inventario:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/inventory/adjust \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "productId": "<product-id>",
+    "newQuantity": 25,
+    "reason": "Conteo fisico",
+    "type": "COUNT"
+  }'
+```
+
+## Estructura
+
+```text
+pos-server/
+  prisma/
+    migrations/
+    schema.prisma
+    seed.ts
+  src/
+    db/
+      prisma.ts
+    middleware/
+      auth.ts
+    routes/
+      auth.ts
+      categories.ts
+      inventory.ts
+      orders.ts
+      products.ts
+      promotions.ts
+      users.ts
+    types/
+      express.d.ts
+    index.ts
+  package.json
+  tsconfig.json
+  .env.example
+```
+
+## Desarrollo
+
+Despues de cambiar `prisma/schema.prisma`, crea una migracion:
+
+```bash
+npm run db:migrate -- --name nombre_de_la_migracion
+```
+
+Para inspeccionar la base de datos:
 
 ```bash
 npm run db:studio
 ```
 
-Se abrirá `http://localhost:5555` con UI interactiva.
+## Produccion
 
-### Detener y limpiar Docker
+Variables minimas recomendadas:
 
-```bash
-docker-compose down
-docker-compose down -v  # También elimina volúmenes (BD)
-```
-
-## 🚀 Deploy en Production (Railway)
-
-### 1. Conectar repo a Railway
-
-- Crea cuenta en [railway.app](https://railway.app)
-- Conecta tu repo de GitHub
-- Railway detecta automáticamente Node.js
-
-### 2. Configurar variables de entorno en Railway
-
-En el dashboard de Railway, añade:
-
-```
-DATABASE_URL=postgresql://...@...@verceldb.com/...  # Supabase
+```env
+DATABASE_URL=postgresql://...
 NODE_ENV=production
 PORT=3000
-CORS_ORIGIN=https://tu-dominio.vercel.app
+CORS_ORIGIN=https://tu-frontend.com
 API_VERSION=v1
+JWT_SECRET=<secreto-largo-y-privado>
+JWT_EXPIRES_IN=1h
 ```
 
-### 3. Railway ejecutará automáticamente:
-
-- `npm install`
-- `npm run build`
-- `npm start`
-
-**Nota**: Railway ejecuta migraciones automáticamente si añades un servicio PostgreSQL, pero con Supabase externa, ejecuta manualmente o usa GitHub Actions (ver abajo).
-
-### 4. Ejecutar migraciones en producción (GitHub Actions)
-
-Crea `.github/workflows/migrate.yml`:
-
-```yaml
-name: Migrate Database
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  migrate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-      - run: cd pos-server && npm ci
-      - run: cd pos-server && npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-```
-
-## 🗂️ Base de Datos: Desarrollo vs Producción
-
-### Desarrollo: Docker + Postgres Local
+Antes de iniciar la app en produccion:
 
 ```bash
-docker-compose up -d
+npm run db:migrate:prod
+npm run build
+npm start
 ```
 
-- Rápido, sin conexión internet requerida
-- Datos se pierden al hacer `docker-compose down -v`
-- Ideal para desarrollo y testing
+Si se despliega en Railway dentro del monorepo, configura el root directory del
+servicio como `pos-server`.
 
-### Producción: Supabase
+## Notas de seguridad pendientes
 
-1. Crea proyecto en [supabase.com](https://supabase.com)
-2. Obtén `DATABASE_URL` desde Settings → Database
-3. Asigna a `DATABASE_URL` en Railway
-4. Supabase maneja backups automáticos
-
-## 🔐 Seguridad (Checklist)
-
-- [ ] Encriptar contraseñas con `bcrypt` antes de guardar
-- [ ] Añadir autenticación JWT
-- [ ] Validar inputs (usar `zod` o `joi`)
-- [ ] Implementar rate limiting
-- [ ] HTTPS en producción
-- [ ] CORS configurado correctamente
-- [ ] Secretos en variables de entorno (nunca en código)
-- [ ] Logs y monitoreo (Sentry, New Relic)
-
-## 📚 Recursos
-
-- [Prisma Docs](https://www.prisma.io/docs/)
-- [Express.js Guide](https://expressjs.com/)
-- [Railway Deploy](https://docs.railway.app/)
-- [Supabase Docs](https://supabase.com/docs)
-
-## 📝 Ejemplo de Request
-
-```bash
-# Crear producto
-curl -X POST http://localhost:3000/api/v1/products \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "PROD001",
-    "name": "Laptop",
-    "price": 999.99,
-    "quantity": 5
-  }'
-```
-
----
-
-Made with ❤️ for POS Systems
+- Validacion de payloads con una libreria como Zod o Joi.
+- Rate limiting para endpoints publicos como login.
+- Revisar que el frontend envie siempre el header `Authorization`.
+- Usar un `JWT_SECRET` fuerte en produccion.
+- Evitar logs temporales en rutas de autenticacion antes de desplegar.

@@ -11,3 +11,17 @@
 .cart-panel {
   height: 100%;
 }
+
+@media (max-width: 820px) {
+  .terminal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-panel {
+    order: 1;
+  }
+
+  .cart-panel {
+    order: 2;
+  }
+}

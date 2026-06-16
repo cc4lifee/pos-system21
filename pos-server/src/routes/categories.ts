@@ -1,6 +1,13 @@
 import { Router, Request, Response } from "express";
-import { prisma } from "../db/prisma";
 import { authMiddleware } from "../middleware/auth";
+import {
+  getCategories,
+  categoryById,
+  categoryProductCount,
+  createCategory,
+  deleteCategory,
+  updateCategory,
+} from "../controllers/categories.controller";
 
 const router = Router();
 router.use(authMiddleware);
@@ -8,10 +15,8 @@ router.use(authMiddleware);
 // GET all categories
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { name: "asc" },
-    });
-    res.json(categories);
+    const result = await getCategories();
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
@@ -20,10 +25,7 @@ router.get("/", async (req: Request, res: Response) => {
 // GET category by ID
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const category = await prisma.category.findUnique({
-      where: { id: req.params.id },
-      include: { _count: { select: { products: true } } },
-    });
+    const category = await categoryById(req.params.id);
 
     if (!category) {
       return res.status(404).json({ error: "Category not found" });
@@ -44,12 +46,7 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const category = await prisma.category.create({
-      data: {
-        name,
-        slug,
-      },
-    });
+    const category = await createCategory({ name, slug });
 
     res.status(201).json(category);
   } catch (error: any) {
@@ -65,13 +62,7 @@ router.put("/:id", async (req: Request, res: Response) => {
   try {
     const { name, slug } = req.body;
 
-    const category = await prisma.category.update({
-      where: { id: req.params.id },
-      data: {
-        ...(name && { name }),
-        ...(slug && { slug }),
-      },
-    });
+    const category = await updateCategory(req.params.id, { name, slug });
 
     res.json(category);
   } catch (error: any) {
@@ -85,9 +76,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 // DELETE category
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    const productCount = await prisma.product.count({
-      where: { categoryId: req.params.id },
-    });
+    const productCount = await categoryProductCount(req.params.id);
 
     if (productCount > 0) {
       return res.status(400).json({
@@ -95,9 +84,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.category.delete({
-      where: { id: req.params.id },
-    });
+    await deleteCategory(req.params.id);
 
     res.json({ message: "Category deleted" });
   } catch (error: any) {

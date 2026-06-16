@@ -15,10 +15,14 @@ export interface ApiResponse {
 export interface User {
   id: string;
   email?: string;
-  firstname: string;
-  full_name: string;
-  lastname: string;
-  role: string;
+  name: string;
+  role: {
+    id: string;
+    name: string;
+    label?: string | null;
+  };
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface AuthResponse {
@@ -56,7 +60,7 @@ export class AuthService {
 
   user = computed(() => this._user());
   token = computed(() => this._token);
-  isAdmin = computed(() => this._user()?.role.includes('ADMIN') ?? false);
+  isAdmin = computed(() => this._user()?.role.name === 'ADMIN');
 
   login(email: string, password: string): Observable<boolean> {
     return this.http
@@ -78,10 +82,10 @@ export class AuthService {
     }
 
     return this.http
-      .get<AuthResponse>(`${baseUrl}/auth/check-status`, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
+      .get<AuthResponse>(`${baseUrl}/auth/renew`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
       .pipe(
         map((resp) => this.handleAuthSuccess(resp)),

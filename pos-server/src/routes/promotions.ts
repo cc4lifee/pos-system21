@@ -1,6 +1,11 @@
 import { Router, Request, Response } from "express";
-import { prisma } from "../db/prisma";
 import { authMiddleware, requireRole } from "../middleware/auth";
+import {
+  createPromotion,
+  promotionById,
+  promotions,
+  updatePromotion,
+} from "../controllers/promotions.controller";
 
 const router = Router();
 router.use(authMiddleware);
@@ -8,10 +13,8 @@ router.use(authMiddleware);
 // GET /api/v1/promotions
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const promotions = await prisma.promotion.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(promotions);
+    const result = await promotions();
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch promotions" });
   }
@@ -20,9 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
 // GET promotion by ID
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const promotion = await prisma.promotion.findUnique({
-      where: { id: req.params.id },
-    });
+    const promotion = await promotionById(req.params.id);
     if (!promotion) {
       return res.status(404).json({ error: "Promotion not found" });
     }
@@ -41,13 +42,11 @@ router.post("/", requireRole("ADMIN"), async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Code and name are required" });
     }
 
-    const promotion = await prisma.promotion.create({
-      data: {
-        code,
-        name,
-        description,
-        active: active !== undefined ? Boolean(active) : true,
-      },
+    const promotion = await createPromotion({
+      code,
+      name,
+      description,
+      active: active !== undefined ? Boolean(active) : true,
     });
 
     res.status(201).json(promotion);
@@ -72,10 +71,7 @@ router.put(
       if (description !== undefined) data.description = description;
       if (active !== undefined) data.active = Boolean(active);
 
-      const promotion = await prisma.promotion.update({
-        where: { id: req.params.id },
-        data,
-      });
+      const promotion = await updatePromotion(req.params.id, data);
 
       res.json(promotion);
     } catch (error: any) {

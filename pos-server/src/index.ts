@@ -48,6 +48,8 @@ app.get("/", (req: Request, res: Response) => {
       categories: `${apiPrefix}/categories`,
       users: `${apiPrefix}/users`,
       orders: `${apiPrefix}/orders`,
+      promotions: `${apiPrefix}/promotions`,
+      inventory: `${apiPrefix}/inventory`,
     },
   });
 });

@@ -1,6 +1,9 @@
 import { Router, Request, Response } from "express";
-import { prisma } from "../db/prisma";
 import { authMiddleware, requireRole } from "../middleware/auth";
+import {
+  adjustInventory,
+  inventoryTransactionsByProduct,
+} from "../controllers/inventory.controller";
 
 const router = Router();
 router.use(authMiddleware);
@@ -20,33 +23,12 @@ router.post(
           .json({ error: "productId and newQuantity are required" });
       }
 
-      const result = await prisma.$transaction(async (tx) => {
-        const product = await tx.product.findUnique({
-          where: { id: productId },
-        });
-        if (!product) throw new Error("Product not found");
-
-        const quantityBefore = product.quantity;
-        const change = newQuantity - quantityBefore;
-
-        const updated = await tx.product.update({
-          where: { id: productId },
-          data: { quantity: newQuantity },
-        });
-
-        const txLog = await tx.inventoryTransaction.create({
-          data: {
-            productId,
-            userId,
-            change,
-            type: type || "ADJUSTMENT",
-            reason,
-            quantityBefore,
-            quantityAfter: newQuantity,
-          },
-        });
-
-        return { updated, txLog };
+      const result = await adjustInventory({
+        productId,
+        newQuantity,
+        reason,
+        type,
+        userId,
       });
 
       res.json(result);
@@ -61,10 +43,7 @@ router.post(
 router.get("/:productId/transactions", async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
-    const transactions = await prisma.inventoryTransaction.findMany({
-      where: { productId },
-      orderBy: { createdAt: "desc" },
-    });
+    const transactions = await inventoryTransactionsByProduct(productId);
     res.json(transactions);
   } catch (err: any) {
     console.error(err);
