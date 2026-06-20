@@ -25,10 +25,6 @@ export class Header {
   private readonly productService = inject(ProductService);
   private readonly orderService = inject(OrderService);
 
-  // Signals temporales
-
-  readonly ordersCount = computed(() => 100);
-
   private readonly currentTitle = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),

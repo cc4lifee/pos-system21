@@ -15,10 +15,6 @@ export class OrderService {
   public orderStats = signal<OrderStats | null>(null);
   public monthlyStatsOrders = signal<MontlyStatsOrders | null>(null);
 
-  public readonly pendingOrdersCount = computed(
-    () => this.orders().filter((order) => order.status === 'PENDING').length,
-  );
-
   async getOrders(): Promise<void> {
     const orders = await firstValueFrom(this.http.get<Orders[]>(`${this.baseUrl}/orders`));
     this.orders.set(orders);

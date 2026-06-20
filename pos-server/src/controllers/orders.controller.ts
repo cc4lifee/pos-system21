@@ -17,12 +17,32 @@ export const VALID_ORDER_STATUS = [
 const orderListArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
   include: {
     user: {
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true },
+    },
+    _count: {
+      select: {
+        items: true,
+      },
+    },
+  },
+});
+
+const pendingOrderArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
+  include: {
+    user: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
     },
     items: {
       include: {
         product: {
-          select: { id: true, name: true },
+          select: {
+            id: true,
+            name: true,
+          },
         },
         promotion: true,
       },
@@ -33,7 +53,7 @@ const orderListArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
 const orderDetailArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
   include: {
     user: {
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true },
     },
     items: {
       include: {
@@ -41,6 +61,7 @@ const orderDetailArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
         promotion: true,
       },
     },
+    payments: true,
   },
 });
 
@@ -62,10 +83,15 @@ type ParsedOrderItem = {
   discount: number;
 };
 
+type CreateOrderPaymentInput = {
+  method: string;
+  amount: number;
+};
+
 type CreateOrderInput = {
   userId: string;
   total: number;
-  paymentMethod?: string;
+  payments?: CreateOrderPaymentInput[];
   notes?: string;
   items: CreateOrderItemInput[];
 };
@@ -87,8 +113,14 @@ const isValidPositiveNumber = (value: unknown) =>
 
 export class BadRequestError extends Error {}
 
-export const orders = (): Promise<OrderListItem[]> => {
+export const getOrders = (): Promise<OrderListItem[]> => {
   return prisma.order.findMany({
+    //! eventualmente con filtros...
+    // where: {
+    //   status: {
+    //     not: "PENDING",
+    //   },
+    // },
     ...orderListArgs,
     orderBy: { createdAt: "desc" },
   });
@@ -104,7 +136,7 @@ export const orderById = (orderId: string): Promise<OrderDetail | null> => {
 export const createOrder = async ({
   userId,
   total,
-  paymentMethod,
+  payments,
   notes,
   items,
 }: CreateOrderInput) => {
@@ -149,30 +181,40 @@ export const createOrder = async ({
     };
   });
 
-  const paymentMethodValue = paymentMethod
-    ? toUpperString(paymentMethod)
-    : PaymentMethod.CASH;
+  // ✅ Solo parsea si vienen payments, no lanza error si no vienen
+  const parsedPayments =
+    payments && Array.isArray(payments) && payments.length > 0
+      ? payments.map((payment, index) => {
+          const method = toUpperString(payment.method);
+          const amount = Number(payment.amount);
 
-  if (!VALID_PAYMENT_METHODS.includes(paymentMethodValue as PaymentMethod)) {
-    throw new BadRequestError(
-      `Invalid paymentMethod. Allowed values are: ${VALID_PAYMENT_METHODS.join(", ")}`,
-    );
+          if (!VALID_PAYMENT_METHODS.includes(method as PaymentMethod)) {
+            throw new BadRequestError(
+              `Invalid payment method at index ${index}`,
+            );
+          }
+          if (!isValidPositiveNumber(amount) || amount <= 0) {
+            throw new BadRequestError(
+              `Invalid payment amount at index ${index}`,
+            );
+          }
+
+          return { method: method as PaymentMethod, amount };
+        })
+      : [];
+
+  // ✅ Solo valida el total si vienen payments
+  if (parsedPayments.length > 0) {
+    const paymentTotal = parsedPayments.reduce((sum, p) => sum + p.amount, 0);
+    if (Math.abs(paymentTotal - Number(total)) > 0.01) {
+      throw new BadRequestError("Payment total must match order total");
+    }
   }
-
-  const itemSubtotalSum = parsedItems.reduce(
-    (sum, item) => sum + item.subtotal,
-    0,
-  );
-
-  if (Math.abs(Number(total) - itemSubtotalSum) > 0.01) {
-    throw new BadRequestError(
-      "Order total must match the sum of item subtotals",
-    );
-  }
-
-  const orderNumber = `ORD-${Date.now()}`;
 
   return prisma.$transaction(async (tx) => {
+    const orderCount = await tx.order.count();
+    const orderNumber = `${String(orderCount + 1).padStart(4, "0")}`;
+
     const productIds = parsedItems.map((item) => item.productId);
     const dbProducts = await tx.product.findMany({
       where: { id: { in: productIds } },
@@ -205,12 +247,14 @@ export const createOrder = async ({
       }
     }
 
+    const hasPayments = parsedPayments.length > 0;
+
     const order = await tx.order.create({
       data: {
         orderNumber,
         userId,
         total: Number(total),
-        paymentMethod: paymentMethodValue as PaymentMethod,
+        status: hasPayments ? "COMPLETED" : "PENDING",
         notes,
         items: {
           create: parsedItems.map((item) => ({
@@ -222,11 +266,21 @@ export const createOrder = async ({
             promotionId: item.promotionId,
           })),
         },
+        payments: hasPayments
+          ? {
+              create: parsedPayments.map((payment) => ({
+                amount: payment.amount,
+                method: payment.method,
+                status: "COMPLETED" as const,
+              })),
+            }
+          : undefined,
       },
       include: {
         items: {
           include: { product: true, promotion: true },
         },
+        payments: true,
         user: { select: { id: true, name: true } },
       },
     });
@@ -245,6 +299,66 @@ export const createOrder = async ({
   });
 };
 
+export const payOrder = async (
+  orderId: string,
+  payments: CreateOrderPaymentInput[],
+) => {
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+
+  if (!order) throw new BadRequestError("Order not found");
+  if (order.status !== "PENDING")
+    throw new BadRequestError("Only pending orders can be paid");
+
+  if (!payments || !Array.isArray(payments) || payments.length === 0) {
+    throw new BadRequestError("At least one payment is required");
+  }
+
+  const parsedPayments = payments.map((payment, index) => {
+    const method = toUpperString(payment.method);
+    const amount = Number(payment.amount);
+
+    if (!VALID_PAYMENT_METHODS.includes(method as PaymentMethod)) {
+      throw new BadRequestError(`Invalid payment method at index ${index}`);
+    }
+    if (!isValidPositiveNumber(amount) || amount <= 0) {
+      throw new BadRequestError(`Invalid payment amount at index ${index}`);
+    }
+
+    return { method: method as PaymentMethod, amount };
+  });
+
+  const paymentTotal = parsedPayments.reduce((sum, p) => sum + p.amount, 0);
+
+  // ✅ No puede pagar menos del total
+  if (paymentTotal - order.total < -0.01) {
+    throw new BadRequestError("Payment total is less than order total");
+  }
+
+  const change = paymentTotal - order.total;
+
+  return prisma.$transaction(async (tx) => {
+    await tx.payment.createMany({
+      data: parsedPayments.map((p) => ({
+        orderId,
+        amount: p.amount,
+        method: p.method,
+        status: "COMPLETED" as const,
+      })),
+    });
+
+    const updatedOrder = await tx.order.update({
+      where: { id: orderId },
+      data: { status: "COMPLETED" },
+      ...orderDetailArgs,
+    });
+
+    return {
+      ...updatedOrder,
+      change: change > 0.01 ? Number(change.toFixed(2)) : 0,
+    };
+  });
+};
+
 export const updateOrderStatus = (orderId: string, status: string) => {
   if (!status) {
     throw new BadRequestError("Status is required");
@@ -255,6 +369,11 @@ export const updateOrderStatus = (orderId: string, status: string) => {
     throw new BadRequestError(
       `Invalid status. Allowed values are: ${VALID_ORDER_STATUS.join(", ")}`,
     );
+  }
+
+  // ✅ COMPLETED solo se puede hacer a través de payOrder
+  if (statusValue === "COMPLETED") {
+    throw new BadRequestError("Use the pay endpoint to complete an order");
   }
 
   return prisma.order.update({
@@ -293,7 +412,7 @@ export const pendingOrders = () => {
     where: {
       status: "PENDING",
     },
-    ...orderListArgs,
+    ...pendingOrderArgs,
     orderBy: {
       createdAt: "desc",
     },

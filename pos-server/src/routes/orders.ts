@@ -5,10 +5,11 @@ import {
   createOrder,
   orderById,
   orderMontlyStats,
-  orders,
+  getOrders,
   orderStats,
   pendingOrders,
   updateOrderStatus,
+  payOrder,
 } from "../controllers/orders.controller";
 
 const router = Router();
@@ -17,7 +18,7 @@ router.use(authMiddleware);
 // GET all orders
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const result = await orders();
+    const result = await getOrders();
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders", details: error });
@@ -48,6 +49,22 @@ router.get("/monthlyStats", async (req: Request, res: Response) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders", details: error });
+  }
+});
+
+// PAY order
+router.post("/:id/pay", async (req: Request, res: Response) => {
+  try {
+    const order = await payOrder(req.params.id, req.body.payments);
+    res.json(order);
+  } catch (error: any) {
+    if (error instanceof BadRequestError) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    res.status(500).json({ error: "Failed to pay order" });
   }
 });
 

@@ -4,12 +4,20 @@ export interface Orders {
   userId: string;
   total: number;
   status: string;
-  paymentMethod: string;
   notes: null;
   createdAt: Date;
   updatedAt: Date;
   user: User;
-  items: Item[];
+  _count: Count;
+}
+
+export interface Count {
+  items: number;
+}
+
+export interface User {
+  id: string;
+  name: string;
 }
 
 export interface Item {
@@ -38,12 +46,6 @@ export interface Promotion {
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
 }
 
 export interface MontlyStatsOrders {

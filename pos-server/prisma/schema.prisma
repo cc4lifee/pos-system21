@@ -93,7 +93,6 @@ model Order {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   total         Float
   status        OrderStatus   @default(PENDING)
-  paymentMethod PaymentMethod @default(CASH)
   notes         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -181,7 +180,7 @@ model Payment {
   order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   amount         Float
   method         PaymentMethod
-  status         PaymentStatus @default(PENDING)
+  status         PaymentStatus @default(COMPLETED)
   transactionRef String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
