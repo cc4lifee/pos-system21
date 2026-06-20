@@ -4,7 +4,10 @@ import {
   BadRequestError,
   createOrder,
   orderById,
+  orderMontlyStats,
   orders,
+  orderStats,
+  pendingOrders,
   updateOrderStatus,
 } from "../controllers/orders.controller";
 
@@ -17,7 +20,34 @@ router.get("/", async (req: Request, res: Response) => {
     const result = await orders();
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch orders" });
+    res.status(500).json({ error: "Failed to fetch orders", details: error });
+  }
+});
+
+router.get("/pending", async (req: Request, res: Response) => {
+  try {
+    const result = await pendingOrders();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders", details: error });
+  }
+});
+
+router.get("/stats", async (req: Request, res: Response) => {
+  try {
+    const result = await orderStats();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders", details: error });
+  }
+});
+
+router.get("/monthlyStats", async (req: Request, res: Response) => {
+  try {
+    const result = await orderMontlyStats();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders", details: error });
   }
 });
 
@@ -51,6 +81,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 // UPDATE order status
 router.patch("/:id/status", async (req: Request, res: Response) => {
+  console.log("entra aqui ?");
   try {
     const order = await updateOrderStatus(req.params.id, req.body.status);
     res.json(order);

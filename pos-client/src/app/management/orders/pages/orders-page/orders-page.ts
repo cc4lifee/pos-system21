@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Header } from '../../../../shared/components/header/header';
+import { OrderService } from '../../services/order-service';
 
 @Component({
   selector: 'app-orders-page',
@@ -7,4 +8,10 @@ import { Header } from '../../../../shared/components/header/header';
   templateUrl: './orders-page.html',
   styleUrl: './orders-page.scss',
 })
-export class OrdersPage {}
+export class OrdersPage {
+  private readonly orderService = inject(OrderService);
+
+  async ngOnInit() {
+    await this.orderService.getOrderStats();
+  }
+}

@@ -3,6 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
+import { CategoryService } from '../../../management/categories/services/categories';
+import { ProductService } from '../../../management/products/services/product-service';
+import { OrderService } from '../../../management/orders/services/order-service';
 
 interface HeaderData {
   title: string;
@@ -18,11 +21,12 @@ interface HeaderData {
 export class Header {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly categoryService = inject(CategoryService);
+  private readonly productService = inject(ProductService);
+  private readonly orderService = inject(OrderService);
 
   // Signals temporales
-  readonly productsCount = computed(() => 125);
-  readonly categoriesCount = computed(() => 8);
-  readonly pendingOrdersCount = computed(() => 5);
+
   readonly ordersCount = computed(() => 100);
 
   private readonly currentTitle = toSignal(
@@ -48,10 +52,12 @@ export class Header {
     const subtitleMap: Record<string, () => string> = {
       Terminal: () => 'Tap a product to add it',
       Productos: () =>
-        `${this.productsCount()} products across ${this.categoriesCount()} categories`,
-      'Ordenes Pendientes': () => `${this.pendingOrdersCount()} orders waiting for payment`,
-      Ordenes: () => `${this.ordersCount()} | Total revenue $12,345.67`,
-      Categorias: () => `${this.categoriesCount()} categorias`,
+        `${this.productService.productsCount()} products across ${this.categoryService.categoriesCount()} categories`,
+      'Ordenes Pendientes': () =>
+        `${this.orderService.pendingOrders().length} orders waiting for payment`,
+      Ordenes: () =>
+        `${this.orderService.orderStats()?.totalOrders} orders | Total revenue $${this.orderService.orderStats()?.totalRevenue}`,
+      Categorias: () => `${this.categoryService.categoriesCount()} categorias`,
       Dashboard: () => `Ultimas analíticas y reportes`,
       'Color Palette': () => ``,
     };

@@ -73,6 +73,12 @@ type CreateOrderInput = {
 export type OrderListItem = Prisma.OrderGetPayload<typeof orderListArgs>;
 export type OrderDetail = Prisma.OrderGetPayload<typeof orderDetailArgs>;
 
+const startOfMonth = new Date(
+  new Date().getFullYear(),
+  new Date().getMonth(),
+  1,
+);
+
 const toUpperString = (value: unknown) =>
   value?.toString().trim().toUpperCase();
 
@@ -261,4 +267,75 @@ export const updateOrderStatus = (orderId: string, status: string) => {
       },
     },
   });
+};
+
+export const orderStats = async () => {
+  const [totalOrders, revenue] = await Promise.all([
+    prisma.order.count(),
+    prisma.order.aggregate({
+      where: {
+        status: "COMPLETED",
+      },
+      _sum: {
+        total: true,
+      },
+    }),
+  ]);
+
+  return {
+    totalOrders,
+    totalRevenue: revenue._sum.total ?? 0,
+  };
+};
+
+export const pendingOrders = () => {
+  return prisma.order.findMany({
+    where: {
+      status: "PENDING",
+    },
+    ...orderListArgs,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const orderMontlyStats = async () => {
+  const [completedOrders, cancelledOrders, revenue] = await Promise.all([
+    prisma.order.count({
+      where: {
+        status: "COMPLETED",
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+    }),
+
+    prisma.order.count({
+      where: {
+        status: "CANCELLED",
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+    }),
+
+    prisma.order.aggregate({
+      where: {
+        status: "COMPLETED",
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+      _sum: {
+        total: true,
+      },
+    }),
+  ]);
+
+  return {
+    completedOrders,
+    cancelledOrders,
+    totalRevenue: revenue._sum.total ?? 0,
+  };
 };

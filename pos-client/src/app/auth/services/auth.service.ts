@@ -49,6 +49,7 @@ export class AuthService {
 
   async checkStatus(): Promise<boolean> {
     const token = localStorage.getItem('token');
+
     if (!token) {
       this.logout();
       return false;

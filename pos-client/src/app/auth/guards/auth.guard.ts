@@ -7,7 +7,7 @@ export const AuthGuard: CanMatchFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const isAuthenticated = await authService.checkStatus();
+  const isAuthenticated = authService.authStatus() === 'authenticated';
   const requireAuth = route.data?.['requireAuth'] !== false; // default: true
 
   if (requireAuth && !isAuthenticated) {
