@@ -7,13 +7,14 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.routes').then((m) => m.authRoutes),
-    // canMatch: [AuthGuard],
-    // data: { requireAuth: false },
+    canMatch: [AuthGuard],
+    data: { requireAuth: false },
   },
 
   {
     path: '',
     component: MainLayout,
+    canMatch: [AuthGuard],
     children: [
       {
         path: 'management',
@@ -26,7 +27,5 @@ export const routes: Routes = [
       },
       { path: '', redirectTo: 'management', pathMatch: 'full' },
     ],
-
-    // canMatch: [AuthGuard],
   },
 ];

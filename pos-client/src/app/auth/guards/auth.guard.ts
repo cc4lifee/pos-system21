@@ -4,11 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const AuthGuard: CanMatchFn = async (route, state) => {
-
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const isAuthenticated = await firstValueFrom(authService.checkStatus());
+  const isAuthenticated = await authService.checkStatus();
   const requireAuth = route.data?.['requireAuth'] !== false; // default: true
 
   if (requireAuth && !isAuthenticated) {
@@ -17,8 +16,7 @@ export const AuthGuard: CanMatchFn = async (route, state) => {
   }
 
   if (!requireAuth && isAuthenticated) {
-    router.navigateByUrl('/');
-    return false;
+    return router.createUrlTree(['/']);
   }
 
   return true;

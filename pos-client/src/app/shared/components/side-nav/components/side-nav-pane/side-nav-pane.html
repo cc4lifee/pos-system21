@@ -1,36 +1,75 @@
 <mat-drawer-container class="layout" autosize>
   <!-- ✅ DESKTOP SIDENAV -->
-  @if (!sideNav.isMobile()) {
+  @if (!sideNavService.isMobile()) {
     <mat-drawer
       mode="side"
       [opened]="true"
-      [class.minimized]="sideNav.isMinimized() && !sideNav.isMobile()"
+      [class.minimized]="sideNavService.isMinimized() && !sideNavService.isMobile()"
     >
-      <div class="drawer-header">
-        @if (!sideNav.isMinimized()) {
-          <div class="title-large shadow">POS System</div>
+      <div class="drawer-container">
+        <div class="drawer-header">
+          @if (!sideNavService.isMinimized()) {
+            <div class="title-large shadow">POS System</div>
+          }
+
+          <button matIconButton (click)="sideNavService.toggleDesktopMinimize()">
+            <span class="material-symbols-outlined text-on-surface">
+              {{ sideNavService.isMinimized() ? 'chevron_right' : 'chevron_left' }}
+            </span>
+          </button>
+        </div>
+
+        @if (!sideNavService.isMinimized()) {
+          <mat-divider />
         }
 
-        <button matIconButton (click)="sideNav.toggleDesktopMinimize()">
-          <mat-icon>
-            {{ sideNav.isMinimized() ? 'chevron_right' : 'chevron_left' }}
-          </mat-icon>
-        </button>
+        <app-side-nav-menu-items />
+
+        <!-- Logout -->
+        <div
+          class="menu-item"
+          [class.minimized]="sideNavService.isMinimized()"
+          [class.maximized]="!sideNavService.isMinimized()"
+        >
+          <button matButton (click)="logout()">
+            <div>
+              <span class="material-symbols-outlined text-on-surface">logout</span>
+              @if (!sideNavService.isMinimized()) {
+                <label class="label-large text-on-surface">Logout</label>
+              }
+            </div>
+          </button>
+        </div>
       </div>
-
-      @if (!sideNav.isMinimized()) {
-        <mat-divider />
-      }
-
-      <app-side-nav-menu-items />
     </mat-drawer>
   }
 
-  <!-- ✅ MOBILE SIDENAV -->
-  @if (sideNav.isMobile()) {
-    <mat-drawer mode="over" [opened]="sideNav.mobileOpen()" (closed)="sideNav.closeMobile()">
-      <div style="margin-top: 1rem">
-        <app-side-nav-menu-items (itemSelected)="sideNav.closeMobile()" />
+  <!-- ✅ MOBILE sideNavService -->
+  @if (sideNavService.isMobile()) {
+    <mat-drawer
+      mode="over"
+      [opened]="sideNavService.mobileOpen()"
+      (closed)="sideNavService.closeMobile()"
+    >
+      <div class="drawer-container">
+        <div style="margin-top: 1rem">
+          <app-side-nav-menu-items (itemSelected)="sideNavService.closeMobile()" />
+        </div>
+
+        <div
+          class="menu-item"
+          [class.minimized]="sideNavService.isMinimized()"
+          [class.maximized]="!sideNavService.isMinimized()"
+        >
+          <button matButton (click)="logout()">
+            <div>
+              <span class="material-symbols-outlined text-on-surface">logout</span>
+              @if (!sideNavService.isMinimized()) {
+                <label class="label-large text-on-surface">Logout</label>
+              }
+            </div>
+          </button>
+        </div>
       </div>
     </mat-drawer>
   }
@@ -38,8 +77,8 @@
   <!-- ✅ CONTENT -->
   <mat-drawer-content>
     <!-- MOBILE BUTTON -->
-    @if (sideNav.isMobile()) {
-      <button matIconButton (click)="sideNav.toggleMobileDrawer()">
+    @if (sideNavService.isMobile()) {
+      <button matIconButton (click)="sideNavService.toggleMobileDrawer()">
         <mat-icon>menu</mat-icon>
       </button>
     }

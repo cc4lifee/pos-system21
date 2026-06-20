@@ -76,3 +76,44 @@ mat-drawer {
 .drawer-content {
   transition: opacity 150ms ease;
 }
+
+.drawer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: stretch;
+}
+
+.menu-item {
+  margin-top: auto;
+  margin-bottom: 1rem;
+}
+
+.material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.minimized {
+  display: flex;
+  justify-content: center;
+}
+
+.menu-item div {
+  display: flex;
+  align-items: center;
+}
+
+.menu-item.maximized {
+  justify-content: space-between;
+  padding: 0rem 0.8rem 0rem 0.5rem;
+}
+
+.maximized button {
+  height: 2.7rem;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+label {
+  margin-left: 0.5rem;
+}

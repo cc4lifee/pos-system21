@@ -4,10 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { SideNavService } from '../../services/side-nav.service';
 import { SideNavMenuItems } from '../side-nav-menu-items/side-nav-menu-items';
-import { Header } from '../../../header/header';
+import { AuthService } from '../../../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-side-nav-pane',
@@ -19,7 +19,6 @@ import { Header } from '../../../header/header';
     MatDividerModule,
     MatIconModule,
     RouterModule,
-    // Header,
     SideNavMenuItems,
   ],
   templateUrl: './side-nav-pane.html',
@@ -27,17 +26,24 @@ import { Header } from '../../../header/header';
   styleUrl: './side-nav-pane.scss',
 })
 export class SideNavPane {
-  protected readonly sideNav = inject(SideNavService);
+  public readonly sideNavService = inject(SideNavService);
+  public readonly authService = inject(AuthService);
+  public readonly router = inject(Router);
 
-  onToggleDesktopMinimize(): void {
-    this.sideNav.toggleDesktopMinimize();
+  public onToggleDesktopMinimize(): void {
+    this.sideNavService.toggleDesktopMinimize();
   }
 
-  onToggleMobile(): void {
-    this.sideNav.toggleMobileDrawer();
+  public onToggleMobile(): void {
+    this.sideNavService.toggleMobileDrawer();
   }
 
-  onMobileItemSelected(): void {
-    this.sideNav.closeMobile();
+  public onMobileItemSelected(): void {
+    this.sideNavService.closeMobile();
+  }
+
+  public async logout() {
+    this.authService.logout();
+    await this.router.navigate(['/auth/login']);
   }
 }

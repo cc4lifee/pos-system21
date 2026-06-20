@@ -1,34 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { Observable, map, catchError, of } from 'rxjs';
+import { map, catchError, of, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface ApiResponse {
-  type: 'Success' | 'Warning' | 'Failure';
-  statusCode: number;
-  message: string;
-  rowsAffected?: number;
-  data?: any;
-}
-
-export interface User {
-  id: string;
-  email?: string;
-  name: string;
-  role: {
-    id: string;
-    name: string;
-    label?: string | null;
-  };
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  token: string;
-}
+import { AuthResponse, User } from '../../shared/interfaces/auth.interface';
+import { Router } from '@angular/router';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 const baseUrl = environment.baseUrl;
@@ -38,15 +13,11 @@ const baseUrl = environment.baseUrl;
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
 
   private _authStatus = signal<AuthStatus>('checking');
   private _user = signal<User | null>(null);
   private _token = signal<string | null>(localStorage.getItem('token'));
-
-  checkStatusResource = rxResource({
-    // loader: () => this.checkStatus(),
-    stream: () => this.checkStatus(),
-  });
 
   authStatus = computed<AuthStatus>(() => {
     if (this._authStatus() === 'checking') return 'checking';
@@ -59,46 +30,49 @@ export class AuthService {
   });
 
   user = computed(() => this._user());
-  token = computed(() => this._token);
+  token = computed(() => this._token());
   isAdmin = computed(() => this._user()?.role.name === 'ADMIN');
 
-  login(email: string, password: string): Observable<boolean> {
-    return this.http
-      .post<AuthResponse>(`${baseUrl}/auth/login`, {
-        email: email,
-        password: password,
-      })
-      .pipe(
-        map((resp) => this.handleAuthSuccess(resp)),
-        catchError((error: any) => this.handleAuthError(error)),
-      );
+  async login(email: string, password: string): Promise<boolean> {
+    return await firstValueFrom(
+      this.http
+        .post<AuthResponse>(`${baseUrl}/auth/login`, {
+          email,
+          password,
+        })
+        .pipe(
+          map((resp) => this.handleAuthSuccess(resp)),
+          catchError((error) => this.handleAuthError(error)),
+        ),
+    );
   }
 
-  checkStatus(): Observable<boolean> {
+  async checkStatus(): Promise<boolean> {
     const token = localStorage.getItem('token');
     if (!token) {
       this.logout();
-      return of(false);
+      return false;
     }
 
-    return this.http
-      .get<AuthResponse>(`${baseUrl}/auth/renew`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .pipe(
-        map((resp) => this.handleAuthSuccess(resp)),
-        catchError((error: any) => this.handleAuthError(error)),
-      );
+    return await firstValueFrom(
+      this.http
+        .get<AuthResponse>(`${baseUrl}/auth/renew`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .pipe(
+          map((resp) => this.handleAuthSuccess(resp)),
+          catchError((error: any) => this.handleAuthError(error)),
+        ),
+    );
   }
 
-  logout() {
+  async logout() {
+    localStorage.removeItem('token');
     this._user.set(null);
     this._token.set(null);
     this._authStatus.set('not-authenticated');
-
-    localStorage.removeItem('token');
   }
 
   private handleAuthSuccess({ token, user }: AuthResponse) {
@@ -106,7 +80,6 @@ export class AuthService {
     this._authStatus.set('authenticated');
     this._token.set(token);
 
-    //! No hay que guardar el token en local Storage, mejor en cookies?
     localStorage.setItem('token', token);
 
     return true;
