@@ -1,37 +1,39 @@
-@let ordersData = this.orderService.orders();
 <app-header />
 <p>orders-page works!</p>
 
-<mat-table [dataSource]="ordersData">
+<table mat-table [dataSource]="dataSource" matSort matSortDirection="desc">
   <ng-container matColumnDef="orderNumber">
-    <mat-header-cell *matHeaderCellDef>Orden</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.orderNumber }}</mat-cell>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Orden</th>
+    <td mat-cell *matCellDef="let row">{{ row.orderNumber }}</td>
   </ng-container>
 
   <ng-container matColumnDef="items">
-    <mat-header-cell *matHeaderCellDef>Items</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row._count.items }}</mat-cell>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Items</th>
+    <td mat-cell *matCellDef="let row">{{ row._count.items }}</td>
   </ng-container>
 
   <ng-container matColumnDef="total">
-    <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.total | currency }}</mat-cell>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+    <td mat-cell *matCellDef="let row">{{ row.total | currency }}</td>
   </ng-container>
 
   <ng-container matColumnDef="status">
-    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-    <mat-cell *matCellDef="let row">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+    <td mat-cell *matCellDef="let row">
       <mat-chip [class]="row.status.toLowerCase()">
         {{ row.status }}
       </mat-chip>
-    </mat-cell>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="createdAt">
-    <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.createdAt | date: 'dd/MM/yyyy' }}</mat-cell>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+    <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'dd/MM/yyyy' }}</td>
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: columns"></mat-row>
-</mat-table>
+</table>
+
+<mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+</mat-paginator>
