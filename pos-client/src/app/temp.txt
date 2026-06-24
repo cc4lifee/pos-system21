@@ -1,0 +1,892 @@
+styles.scss
+
+@use "sass:map";
+@use "sass:meta";
+@use "@angular/material" as mat;
+@use "./theme-colors" as theme-colors;
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+
+  // Reset the user agent margin.
+  // margin: 0;
+  // overflow: hidden;
+  /* 
+  To simulate in Chrome:
+       DevTools -> ⋮ -> Run command -> type Show Rendering -> Emulate CSS media feature prefers-contrast
+  */
+  @media (prefers-contrast: more) {
+    @include theme-colors.high-contrast-overrides(color-scheme);
+  }
+}
+
+html {
+  color-scheme: light; //change back to light dark
+  @include mat.theme(
+    (
+      color: theme-colors.$primary-palette,
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body.dark-mode {
+  color-scheme: dark;
+}
+
+body.light-mode {
+  color-scheme: light;
+}
+
+body.system-mode {
+  color-scheme: light dark;
+}
+
+@mixin palette-css-vars($palette-name, $palette) {
+  @each $tone, $color in $palette {
+    @if meta.type-of($tone) == "number" {
+      --#{$palette-name}-#{$tone}: #{$color};
+    }
+  }
+}
+
+:root {
+  --green-500: #43a854;
+  --yellow-label: #ffc400;
+  --purple-label: #6941c6;
+  --blue-label: #2663c9;
+  --black-label: #041b2c;
+  --white-label: #fff;
+
+  // --primary-98: #{map.get(theme-colors.$primary-palette, 98)};
+  // --neutral-87: #{map.get(theme-colors.$neutral-palette, 87)};
+  // --secondary-98: #{map.get(theme-colors.$secondary-palette, 98)};
+
+  // Top-level palettes
+  @include palette-css-vars(primary, theme-colors.$primary-palette);
+  @include palette-css-vars(tertiary, theme-colors.$tertiary-palette);
+
+  // Nested palettes available on Angular Material palette maps
+  @include palette-css-vars(secondary, map.get(theme-colors.$primary-palette, secondary));
+  @include palette-css-vars(neutral, map.get(theme-colors.$primary-palette, neutral));
+  @include palette-css-vars(
+    neutral-variant,
+    map.get(theme-colors.$primary-palette, neutral-variant)
+  );
+  @include palette-css-vars(error, map.get(theme-colors.$primary-palette, error));
+
+  // *** Material Theme Overrides *** //
+  .table-inputs {
+    --mat-form-field-outlined-outline-color: var(--sys-secondary-fixed);
+  }
+
+  --mat-button-protected-container-shape: 4px; // radius from buttons
+  --mat-button-outlined-container-shape: 4px; // radius from buttons
+  --mat-dialog-container-shape: 4px; // radius from dialogs
+  --reorder-row-container-shape: 8px; // radius from rows in reorder
+
+  .search-field {
+    @include mat.form-field-overrides(
+      (
+        container-height: 2.25rem,
+        container-vertical-padding: 0px,
+        container-text-line-height: 2.5rem,
+      )
+    );
+  }
+
+  .date-range {
+    @include mat.form-field-overrides(
+      (
+        container-height: 2.5rem,
+        container-vertical-padding: 0.1rem,
+        container-text-line-height: 2.5rem,
+      )
+    );
+  }
+
+  @include mat.datepicker-overrides(
+    (
+      toggle-icon-color: var(--sys-primary),
+    )
+  );
+
+  @include mat.tabs-overrides(
+    (
+      label-text-size: 1rem,
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      text-label-text-size: 1rem,
+      outlined-label-text-size: 1rem,
+    )
+  );
+}
+
+/* =====================================================
+   ✅ TYPOGRAPHY 
+===================================================== */
+
+$scales: display, headline, title, body, label;
+$sizes: large, medium, small;
+
+@mixin typography-classes($scales, $sizes) {
+  @each $scale in $scales {
+    @each $size in $sizes {
+      .#{$scale}-#{$size} {
+        font-family: var(--mat-sys-#{$scale}-#{$size}-font);
+        font-size: var(--mat-sys-#{$scale}-#{$size}-size);
+      }
+    }
+  }
+}
+
+@include typography-classes($scales, $sizes);
+
+/* =====================================================
+   ✅ TEXT COLORS (UTILITIES)
+===================================================== */
+
+$color-tokens: (
+  primary,
+  primary-container,
+  primary-fixed,
+  primary-fixed-dim,
+  on-primary,
+  on-primary-container,
+  on-primary-fixed,
+  on-primary-fixed-variant,
+  inverse-primary,
+  secondary,
+  secondary-container,
+  secondary-fixed,
+  secondary-fixed-dim,
+  on-secondary,
+  on-secondary-container,
+  on-secondary-fixed,
+  on-secondary-fixed-variant,
+  tertiary,
+  tertiary-container,
+  tertiary-fixed,
+  tertiary-fixed-dim,
+  on-tertiary,
+  on-tertiary-container,
+  on-tertiary-fixed,
+  on-tertiary-fixed-variant,
+  surface,
+  surface-bright,
+  surface-container,
+  surface-container-high,
+  surface-container-highest,
+  surface-container-low,
+  surface-container-lowest,
+  surface-dim,
+  surface-tint,
+  surface-variant,
+  on-surface,
+  on-surface-variant,
+  inverse-surface,
+  inverse-on-surface,
+  error,
+  error-container,
+  on-error,
+  on-error-container,
+  background,
+  on-background,
+  outline,
+  outline-variant,
+  scrim,
+  shadow
+);
+
+@mixin text-color-classes($tokens) {
+  @each $token in $tokens {
+    .text-#{$token} {
+      color: var(--mat-sys-#{$token});
+    }
+  }
+}
+
+@include text-color-classes($color-tokens);
+
+/* =====================================================
+   ✅ BACKGROUND COLORS (UTILITIES)
+===================================================== */
+
+@mixin bg-color-classes($tokens) {
+  @each $token in $tokens {
+    .bg-#{$token} {
+      background-color: var(--mat-sys-#{$token});
+    }
+  }
+}
+
+@include bg-color-classes($color-tokens);
+
+/* =====================================================
+   ✅ OPTIONAL: 
+===================================================== */
+
+.font-weight-400 {
+  font-weight: 400;
+}
+.font-weight-500 {
+  font-weight: 500;
+}
+.font-weight-600 {
+  font-weight: 600;
+}
+.font-weight-700 {
+  font-weight: 700;
+}
+
+//////////////////////////////////////////////////////////
+
+.no-results {
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// *** Material Theme Overrides *** //
+
+.table-inputs .mat-mdc-select-value {
+  text-align: right;
+  padding-right: 8px;
+}
+
+.table-inputs .mdc-text-field {
+  background-color: #fff;
+  border-radius: var(--mat-form-field-outlined-container-shape);
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.display-none {
+  display: none !important;
+}
+
+// <button mat-raised-button class="primary-button">
+button[mat-raised-button].primary-button {
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+// <button mat-raised-button class="secondary-button">
+button[mat-raised-button].secondary-button {
+  background-color: var(--mat-sys-on-primary);
+  color: var(--mat-sys-on-surface);
+}
+
+// <button mat-stroked-button class="secondary-button">
+button[mat-stroked-button].secondary-button {
+  background-color: var(--mat-sys-on-primary);
+  color: var(--mat-sys-on-surface);
+}
+
+// .primary-color {
+//   color: var(--mat-sys-primary);
+// }
+
+.primary-color-button {
+  background-color: var(--mat-sys-primary);
+  color: #fff;
+  width: 80px;
+  height: 30px;
+  border-radius: 5px;
+}
+
+div.chip-list-container {
+  &.surface-container {
+    background-color: var(--mat-sys-surface-container);
+  }
+  &.surface-dim {
+    background-color: var(--mat-sys-surface-dim);
+  }
+  &.secondary-fixed-dim {
+    background-color: var(--mat-sys-secondary-fixed-dim);
+  }
+}
+
+.custom-tooltip-box {
+  background-color: var(--mat-sys-on-primary-container);
+}
+
+/* =====================================================
+   INVALID (ONLY AFTER USER INTERACTION)
+===================================================== */
+.mat-mdc-form-field.ng-invalid.ng-touched {
+  --mat-mdc-form-field-focus-error-color: var(--mat-sys-error);
+  --mdc-text-field-error-focus-caret-color: var(--mat-sys-error);
+  --mdc-text-field-error-label-text-color: var(--mat-sys-error);
+  --mdc-text-field-error-outline-color: var(--mat-sys-error);
+
+  /* ✅ ARROW (correct MDC layer) */
+  .mdc-text-field {
+    --mat-select-enabled-arrow-color: var(--mat-sys-error);
+  }
+
+  /* ✅ TEXT */
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-placeholder {
+    color: var(--mat-sys-error);
+    -webkit-text-fill-color: var(--mat-sys-error);
+  }
+}
+
+/* =====================================================
+   FOCUS (PRIMARY STATE — ALWAYS WINS)
+===================================================== */
+.mat-mdc-form-field.mat-focused {
+  /* ✅ CRITICAL: override arrow at correct level */
+  .mdc-text-field {
+    --mat-select-enabled-arrow-color: var(--mat-sys-primary);
+  }
+
+  /* ✅ BORDER */
+  .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .mdc-text-field--outlined .mdc-notched-outline__notch,
+  .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-color: var(--mat-sys-primary) !important;
+    border-width: 2px;
+  }
+
+  /* ✅ LABEL */
+  .mdc-floating-label {
+    color: var(--mat-sys-primary) !important;
+  }
+
+  /* ✅ ONLY color placeholder on focus */
+  .mat-mdc-form-field.mat-focused .mat-mdc-select-placeholder {
+    color: var(--mat-sys-primary) !important;
+    -webkit-text-fill-color: var(--mat-sys-primary) !important;
+  }
+
+  /* ✅ RESET selected value to default color */
+  .mat-mdc-form-field.mat-focused .mat-mdc-select-value-text {
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
+  }
+}
+
+/* =====================================================
+   CUSTOM SUFFIX ARROW (GLOBAL FIX)
+===================================================== */
+
+/* INVALID */
+.mat-mdc-form-field.ng-invalid.ng-touched .mat-mdc-form-field-icon-suffix {
+  color: var(--mat-sys-error);
+}
+
+/* ✅ FOCUSED overrides invalid */
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-suffix {
+  color: var(--mat-sys-primary) !important;
+}
+
+
+//////////////////////////////
+
+// This file was generated by running 'ng generate @angular/material:theme-color'.
+// Proceed with caution if making changes to this file.
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+// Note: Color palettes are generated from primary: #2663c9, secondary: #757575, tertiary: #f1f1f1, neutral: #ebecf0
+$_palettes: (
+  primary: (
+    0: #000000,
+    10: #001943,
+    20: #002d6c,
+    25: #003882,
+    30: #004398,
+    35: #004eaf,
+    40: #175ac0,
+    50: #3c74da,
+    60: #598ef6,
+    70: #83aaff,
+    80: #afc6ff,
+    90: #d9e2ff,
+    95: #edf0ff,
+    98: #faf9ff,
+    99: #fefbff,
+    100: #ffffff,
+  ),
+  secondary: (
+    0: #000000,
+    10: #1b1c1c,
+    20: #303031,
+    25: #3b3b3c,
+    30: #464747,
+    35: #525252,
+    40: #5e5e5e,
+    50: #777777,
+    60: #919090,
+    70: #acabab,
+    80: #c7c6c6,
+    90: #e3e2e2,
+    95: #f2f0f0,
+    98: #fbf9f9,
+    99: #fefcfb,
+    100: #ffffff,
+  ),
+  tertiary: (
+    0: #000000,
+    10: #1a1c1c,
+    20: #2f3131,
+    25: #3a3c3c,
+    30: #454747,
+    35: #515353,
+    40: #5d5f5f,
+    50: #767777,
+    60: #909191,
+    70: #aaabab,
+    80: #c6c6c7,
+    90: #e2e2e2,
+    95: #f1f1f1,
+    98: #f9f9f9,
+    99: #fcfcfc,
+    100: #ffffff,
+  ),
+  neutral: (
+    0: #000000,
+    4: #0c0e11,
+    6: #111416,
+    10: #191c1f,
+    12: #1d2023,
+    17: #282a2d,
+    20: #2e3134,
+    22: #323538,
+    24: #37393d,
+    25: #393c3f,
+    30: #44474a,
+    35: #505356,
+    40: #5c5e62,
+    50: #75777b,
+    60: #8f9194,
+    70: #a9abaf,
+    80: #c5c6ca,
+    87: #d9dade,
+    90: #e1e2e6,
+    92: #e7e8ec,
+    94: #edeef2,
+    95: #f0f0f5,
+    96: #f2f3f7,
+    98: #f8f9fd,
+    99: #fcfcff,
+    100: #ffffff,
+  ),
+  neutral-variant: (
+    0: #000000,
+    10: #171b26,
+    20: #2c303c,
+    25: #373b47,
+    30: #424753,
+    35: #4e525f,
+    40: #5a5e6b,
+    50: #737784,
+    60: #8c909e,
+    70: #a7abb9,
+    80: #c3c6d5,
+    90: #dfe2f1,
+    95: #edf0ff,
+    98: #faf9ff,
+    99: #fefbff,
+    100: #ffffff,
+  ),
+  error: (
+    0: #000000,
+    10: #410002,
+    20: #690005,
+    25: #7e0007,
+    30: #93000a,
+    35: #a80710,
+    40: #ba1a1a,
+    50: #de3730,
+    60: #ff5449,
+    70: #ff897d,
+    80: #ffb4ab,
+    90: #ffdad6,
+    95: #ffedea,
+    98: #fff8f7,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+);
+
+$_rest: (
+  secondary: map.get($_palettes, secondary),
+  neutral: map.get($_palettes, neutral),
+  neutral-variant: map.get($_palettes, neutral-variant),
+  error: map.get($_palettes, error),
+);
+
+$primary-palette: map.merge(map.get($_palettes, primary), $_rest);
+$secondary-palette: map.merge(map.get($_palettes, secondary), $_rest);
+$tertiary-palette: map.merge(map.get($_palettes, tertiary), $_rest);
+$neutral-palette: map.merge(map.get($_palettes, neutral), $_rest);
+
+@function _high-contrast-value($light, $dark, $theme-type) {
+  @if ($theme-type == light) {
+    @return $light;
+  }
+  @if ($theme-type == dark) {
+    @return $dark;
+  }
+  @if ($theme-type == color-scheme) {
+    @return light-dark(#{$light}, #{$dark});
+  }
+
+  @error 'Unknown theme-type #{$theme-type}. Expected light, dark, or color-scheme';
+}
+
+@mixin high-contrast-overrides($theme-type) {
+  @include mat.theme-overrides(
+    (
+      primary: _high-contrast-value(#002964, #ecefff, $theme-type),
+      on-primary: _high-contrast-value(#ffffff, #000000, $theme-type),
+      primary-container: _high-contrast-value(#00459d, #a9c2ff, $theme-type),
+      on-primary-container: _high-contrast-value(#ffffff, #000a23, $theme-type),
+      inverse-primary: _high-contrast-value(#afc6ff, #00449b, $theme-type),
+      primary-fixed: _high-contrast-value(#00459d, #d9e2ff, $theme-type),
+      primary-fixed-dim: _high-contrast-value(#002f71, #afc6ff, $theme-type),
+      on-primary-fixed: _high-contrast-value(#ffffff, #000000, $theme-type),
+      on-primary-fixed-variant: _high-contrast-value(#ffffff, #00102f, $theme-type),
+      secondary: _high-contrast-value(#2b2c2c, #f1f0ef, $theme-type),
+      on-secondary: _high-contrast-value(#ffffff, #000000, $theme-type),
+      secondary-container: _high-contrast-value(#494949, #c3c2c2, $theme-type),
+      on-secondary-container: _high-contrast-value(#ffffff, #0a0b0c, $theme-type),
+      secondary-fixed: _high-contrast-value(#494949, #e3e2e2, $theme-type),
+      secondary-fixed-dim: _high-contrast-value(#323333, #c7c6c6, $theme-type),
+      on-secondary-fixed: _high-contrast-value(#ffffff, #000000, $theme-type),
+      on-secondary-fixed-variant: _high-contrast-value(#ffffff, #101111, $theme-type),
+      tertiary: _high-contrast-value(#2a2c2d, #f0f0f0, $theme-type),
+      on-tertiary: _high-contrast-value(#ffffff, #000000, $theme-type),
+      tertiary-container: _high-contrast-value(#48494a, #c2c3c3, $theme-type),
+      on-tertiary-container: _high-contrast-value(#ffffff, #090c0c, $theme-type),
+      tertiary-fixed: _high-contrast-value(#48494a, #e2e2e2, $theme-type),
+      tertiary-fixed-dim: _high-contrast-value(#313333, #c6c6c7, $theme-type),
+      on-tertiary-fixed: _high-contrast-value(#ffffff, #000000, $theme-type),
+      on-tertiary-fixed-variant: _high-contrast-value(#ffffff, #0f1112, $theme-type),
+      background: _high-contrast-value(#f8f9fd, #111416, $theme-type),
+      on-background: _high-contrast-value(#191c1f, #e1e2e6, $theme-type),
+      surface: _high-contrast-value(#f8f9fd, #111416, $theme-type),
+      surface-dim: _high-contrast-value(#b7b9bc, #111416, $theme-type),
+      surface-bright: _high-contrast-value(#f8f9fd, #4e5054, $theme-type),
+      surface-container-low: _high-contrast-value(#f0f0f5, #1d2023, $theme-type),
+      surface-container-lowest: _high-contrast-value(#ffffff, #000000, $theme-type),
+      surface-container: _high-contrast-value(#e1e2e6, #2e3134, $theme-type),
+      surface-container-high: _high-contrast-value(#d3d4d8, #393c3f, $theme-type),
+      surface-container-highest: _high-contrast-value(#c5c6ca, #44474a, $theme-type),
+      on-surface: _high-contrast-value(#000000, #ffffff, $theme-type),
+      shadow: _high-contrast-value(#000000, #000000, $theme-type),
+      scrim: _high-contrast-value(#000000, #000000, $theme-type),
+      surface-tint: _high-contrast-value(#175ac0, #afc6ff, $theme-type),
+      inverse-surface: _high-contrast-value(#2e3134, #e1e2e6, $theme-type),
+      inverse-on-surface: _high-contrast-value(#ffffff, #000000, $theme-type),
+      outline: _high-contrast-value(#282c37, #ecefff, $theme-type),
+      outline-variant: _high-contrast-value(#454955, #bfc2d1, $theme-type),
+      error: _high-contrast-value(#600004, #ffece9, $theme-type),
+      on-error: _high-contrast-value(#ffffff, #000000, $theme-type),
+      error-container: _high-contrast-value(#98000a, #ffaea4, $theme-type),
+      on-error-container: _high-contrast-value(#ffffff, #220001, $theme-type),
+      surface-variant: _high-contrast-value(#dfe2f1, #424753, $theme-type),
+      on-surface-variant: _high-contrast-value(#000000, #ffffff, $theme-type),
+    )
+  );
+}
+
+
+///////////////////////////
+
+
+<div style="margin:0rem 2rem">
+
+    <div class='text-secondary font-weight-500' style="margin-bottom:0.5rem">
+        Used for main UI elements, buttons, and navigation
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-primary text-on-primary">
+            <p>Primary</p>
+            <p>#175ac0</p>
+        </div>
+        <div class="color-palette-container bg-primary-container">
+            <p>Primary Container</p>
+            <p>#d9e2ff</p>
+        </div>
+        <div class="color-palette-container bg-primary-fixed">
+            <p>Primary Fixed</p>
+            <p>#d9e2ff</p>
+        </div>
+        <div class="color-palette-container bg-primary-fixed-dim">
+            <p>Primary Fixed Dim</p>
+            <p>#afc6ff</p>
+        </div>
+        <div class="color-palette-container bg-on-primary">
+            <p>On Primary</p>
+            <p>#ffffff</p>
+        </div>
+        <div class="color-palette-container bg-on-primary-container text-on-primary">
+            <p>On Primary Container</p>
+            <p>#004398</p>
+        </div>
+        <div class="color-palette-container bg-on-primary-fixed text-on-primary">
+            <p>On Primary Fixed</p>
+            <p>#001943</p>
+        </div>
+        <div class="color-palette-container bg-on-primary-fixed-variant text-on-primary">
+            <p>On Primary Fixed Variant</p>
+            <p>#004398</p>
+
+        </div>
+        <div class="color-palette-container bg-inverse-primary">
+            <p>Inverse Primary</p>
+            <p>#afc6ff</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-secondary  text-on-primary">
+            <p>Secondary</p>
+            <p>#5e5e5e</p>
+        </div>
+        <div class="color-palette-container bg-secondary-container">
+            <p>Secondary Container</p>
+            <p>#e3e2e2</p>
+        </div>
+        <div class="color-palette-container bg-secondary-fixed">
+            <p>Secondary Fixed</p>
+            <p>#e3e2e2</p>
+        </div>
+        <div class="color-palette-container bg-secondary-fixed-dim">
+            <p>Secondary Fixed Dim</p>
+            <p>#c7c6c6</p>
+        </div>
+        <div class="color-palette-container bg-on-secondary">
+            <p>On Secondary</p>
+            <p>#ffffff</p>
+        </div>
+        <div class="color-palette-container bg-on-secondary-container text-on-primary">
+            <p>On Secondary Container</p>
+            <p>#464747</p>
+        </div>
+        <div class="color-palette-container bg-on-secondary-fixed text-on-primary">
+            <p>On Secondary Fixed</p>
+            <p>#1b1c1c</p>
+        </div>
+        <div class="color-palette-container bg-on-secondary-fixed-variant text-on-primary">
+            <p>On Secondary Fixed Variant</p>
+            <p>#464747</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-tertiary text-on-primary text-on-primary">
+            <p>Tertiary</p>
+            <p>#175ac0</p>
+        </div>
+        <div class="color-palette-container bg-tertiary-container">
+            <p>Tertiary Container</p>
+            <p>#d9e2ff</p>
+        </div>
+        <div class="color-palette-container bg-tertiary-fixed">
+            <p>Tertiary Fixed</p>
+            <p>#d9e2ff</p>
+        </div>
+        <div class="color-palette-container bg-tertiary-fixed-dim">
+            <p>Tertiary Fixed Dim</p>
+            <p>#afc6ff</p>
+        </div>
+        <div class="color-palette-container bg-on-tertiary">
+            <p>On Tertiary</p>
+            <p>#ffffff</p>
+        </div>
+        <div class="color-palette-container bg-on-tertiary-container text-on-primary text-on-primary">
+            <p>On Tertiary Container</p>
+            <p>#004398</p>
+        </div>
+        <div class="color-palette-container bg-on-tertiary-fixed text-on-primary text-on-primary">
+            <p>On Tertiary Fixed</p>
+            <p>#001943</p>
+        </div>
+        <div class="color-palette-container bg-on-tertiary-fixed-variant text-on-primary text-on-primary">
+            <p>On Tertiary Fixed Variant</p>
+            <p>#004398</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-surface">
+            <p>Surface</p>
+            <p>#f8f9fd</p>
+        </div>
+        <div class="color-palette-container bg-surface-bright">
+            <p>Surface Bright</p>
+            <p>#f8f9fd</p>
+        </div>
+        <div class="color-palette-container bg-surface-container">
+            <p>Surface Container</p>
+            <p>#edeef2</p>
+        </div>
+        <div class="color-palette-container bg-surface-container-high">
+            <p>Surface Container High</p>
+            <p>#e7e8ec</p>
+        </div>
+        <div class="color-palette-container bg-surface-container-highest">
+            <p>Surface Container Highest</p>
+            <p>#e1e2e6</p>
+        </div>
+        <div class="color-palette-container bg-surface-container-low">
+            <p>Surface Container Low</p>
+            <p>#f2f3f7</p>
+        </div>
+        <div class="color-palette-container bg-surface-container-lowest">
+            <p>Surface Container Lowest</p>
+            <p>#ffffff</p>
+        </div>
+        <div class="color-palette-container bg-surface-dim">
+            <p>Surface Dim</p>
+            <p>#d9dade</p>
+        </div>
+        <div class="color-palette-container bg-surface-tint text-on-primary text-on-primary">
+            <p>Surface Tint</p>
+            <p>#175ac0</p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="color-palette-container bg-surface-variant">
+            <p>Surface Variant</p>
+            <p>#dfe2f1</p>
+        </div>
+        <div class="color-palette-container bg-on-surface text-on-primary text-on-primary">
+            <p>On Surface</p>
+            <p>#191c1f</p>
+        </div>
+        <div class="color-palette-container bg-on-surface-variant text-on-primary text-on-primary">
+            <p>On Surface Variant</p>
+            <p>#424753</p>
+        </div>
+        <div class="color-palette-container bg-inverse-surface text-on-primary text-on-primary">
+            <p>Inverse Surface</p>
+            <p>#2e3134</p>
+        </div>
+        <div class="color-palette-container bg-inverse-on-surface">
+            <p>Inverse On Surface</p>
+            <p>#f0f0f5</p>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="color-palette-container bg-error text-on-primary text-on-primary">
+            <p>Error</p>
+            <p>#ba1a1a</p>
+        </div>
+        <div class="color-palette-container bg-error-container">
+            <p>Error Container</p>
+            <p>#ffdad6</p>
+        </div>
+        <div class="color-palette-container bg-on-error">
+            <p>On Error</p>
+            <p>#ffffff</p>
+        </div>
+        <div class="color-palette-container bg-on-error-container text-on-primary text-on-primary">
+            <p>On Error Container</p>
+            <p>#93000a</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-background">
+            <p>Background</p>
+            <p>#f8f9fd</p>
+        </div>
+        <div class="color-palette-container bg-on-background text-on-primary text-on-primary">
+            <p>On Background</p>
+            <p>#191c1f</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="color-palette-container bg-outline text-on-primary">
+            <p>Outline</p>
+            <p>#737784</p>
+        </div>
+        <div class="color-palette-container bg-outline-variant">
+            <p>Outline Variant</p>
+            <p>#c3c6d5</p>
+        </div>
+        <div class="color-palette-container bg-scrim text-on-primary">
+            <p>Scrim</p>
+            <p>#000000</p>
+        </div>
+        <div class="color-palette-container bg-shadow text-on-primary">
+            <p>Shadow</p>
+            <p>#000000</p>
+        </div>
+    </div>
+</div>
+
+
+/////////////////////////////////
+
+.container {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+div.color-palette-container {
+  width: 200px;
+  height: 100px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black;
+}
+
+.color-palette-container {
+  min-width: 150px;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(111, 78, 55, 0.5);
+  }
+
+  // p {
+  //   margin: 0;
+  //   font-weight: 500;
+  //   font-size: 0.875rem;
+  //   text-align: center;
+  // }
+}
