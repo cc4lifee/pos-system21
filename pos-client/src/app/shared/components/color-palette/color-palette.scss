@@ -6,6 +6,17 @@
   flex-wrap: wrap;
 }
 
+/* Color Palette Container: structural only — the background/text color per swatch
+   is composed in the template via the .bg-* / .text-* utility classes above
+   (e.g. class="color-palette-container bg-primary text-on-primary"). */
+div.color-palette-container {
+  width: 200px;
+  height: 100px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black;
+}
+
 .color-palette-container {
   min-width: 150px;
   padding: 1rem;

@@ -1,8 +1,19 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { MontlyStatsOrders, Orders, OrderStats } from '../../../shared/interfaces/orders.interface';
-import { environment } from '../../../../environments/environment.development';
+import {
+  CreateOrderInput,
+  CreateOrderPaymentInput,
+  MonthlyStatsOrders,
+  OrderDetail,
+  Orders,
+  OrderStats,
+  OrderStatusUpdateResult,
+  OrderStatusValue,
+  PayOrderResult,
+  PendingOrder,
+} from '../../../shared/interfaces/orders.interface';
+import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { firstValueFrom } from 'rxjs';
 
 @Service()
 export class OrderService {
@@ -11,9 +22,10 @@ export class OrderService {
   private readonly baseUrl = `${environment.baseUrl}`;
 
   public orders = signal<Orders[]>([]);
-  public pendingOrders = signal<Orders[]>([]);
+  public pendingOrders = signal<PendingOrder[]>([]);
   public orderStats = signal<OrderStats | null>(null);
-  public monthlyStatsOrders = signal<MontlyStatsOrders | null>(null);
+  public monthlyStatsOrders = signal<MonthlyStatsOrders | null>(null);
+  public selectedOrder = signal<OrderDetail | null>(null);
 
   async getOrders(): Promise<void> {
     const orders = await firstValueFrom(this.http.get<Orders[]>(`${this.baseUrl}/orders`));
@@ -21,7 +33,9 @@ export class OrderService {
   }
 
   async getPendingOrders(): Promise<void> {
-    const orders = await firstValueFrom(this.http.get<Orders[]>(`${this.baseUrl}/orders/pending`));
+    const orders = await firstValueFrom(
+      this.http.get<PendingOrder[]>(`${this.baseUrl}/orders/pending`),
+    );
     this.pendingOrders.set(orders);
   }
 
@@ -31,9 +45,44 @@ export class OrderService {
   }
 
   async getMonthlyStatsOrders(): Promise<void> {
-    const montlyStatsOrders = await firstValueFrom(
-      this.http.get<MontlyStatsOrders>(`${this.baseUrl}/orders/montlyStats`),
+    const monthlyStatsOrders = await firstValueFrom(
+      this.http.get<MonthlyStatsOrders>(`${this.baseUrl}/orders/monthlyStats`),
     );
-    this.monthlyStatsOrders.set(montlyStatsOrders);
+    this.monthlyStatsOrders.set(monthlyStatsOrders);
+  }
+
+  async getOrderById(orderId: string): Promise<OrderDetail> {
+    const order = await firstValueFrom(
+      this.http.get<OrderDetail>(`${this.baseUrl}/orders/${orderId}`),
+    );
+    this.selectedOrder.set(order);
+    return order;
+  }
+
+  async createOrder(input: CreateOrderInput): Promise<OrderDetail> {
+    const order = await firstValueFrom(
+      this.http.post<OrderDetail>(`${this.baseUrl}/orders`, input),
+    );
+    this.selectedOrder.set(order);
+    return order;
+  }
+
+  async payOrder(orderId: string, payments: CreateOrderPaymentInput[]): Promise<PayOrderResult> {
+    const order = await firstValueFrom(
+      this.http.post<PayOrderResult>(`${this.baseUrl}/orders/${orderId}/pay`, { payments }),
+    );
+    this.selectedOrder.set(order);
+    return order;
+  }
+
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatusValue,
+  ): Promise<OrderStatusUpdateResult> {
+    return await firstValueFrom(
+      this.http.patch<OrderStatusUpdateResult>(`${this.baseUrl}/orders/${orderId}/status`, {
+        status,
+      }),
+    );
   }
 }

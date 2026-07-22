@@ -39,13 +39,8 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
             }
           },
           "response": []
@@ -62,14 +57,335 @@
             ],
             "url": {
               "raw": "{{base_url}}/auth/renew",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "renew"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["auth", "renew"]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Happy Path (Full Flow)",
+      "description": "Flujo end-to-end de un solo recorrido: login, un usuario, categoría, producto con inventario, promoción con descuento real, una orden que usa esa promoción, el pago, y la verificación del ledger de inventario y del contador de uso de la promoción. Cada request guarda lo que necesita el siguiente en variables de entorno (happyUserId, happyCategoryId, happyProductId, happyPromotionId, happyOrderId), así que puedes correr toda la carpeta de un tirón con el Collection Runner, o simplemente leerla en orden para entender cómo encajan los endpoints nuevos.",
+      "item": [
+        {
+          "name": "1. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"token\", jsonData.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@posystem.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Autentica como admin y guarda el token en {{token}}, usado por todos los pasos siguientes."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Users (pick a cashier)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var cashier = jsonData.find(function (u) { return u.role && u.role.name === 'CASHIER'; }) || jsonData[0];",
+                  "pm.environment.set(\"happyUserId\", cashier.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            },
+            "description": "Toma el primer usuario con rol CASHIER (o el primero que haya) para usarlo como dueño de la orden. Guarda el id en {{happyUserId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"happyCategoryId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Happy Path Demo\",\n  \"slug\": \"happy-path-demo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            },
+            "description": "Crea una categoría nueva para no depender de datos ya existentes. Guarda el id en {{happyCategoryId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Create Product (trackInventory)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"happyProductId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Producto Happy Path\",\n  \"description\": \"Producto de prueba con seguimiento de inventario\",\n  \"price\": 3,\n  \"cost\": 1,\n  \"quantity\": 20,\n  \"trackInventory\": true,\n  \"categoryId\": \"{{happyCategoryId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            },
+            "description": "Producto con trackInventory=true y stock inicial de 20, para poder ver el descuento de stock y el registro nuevo en el ledger de inventario más adelante. Guarda el id en {{happyProductId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Create Promotion (10% PERCENTAGE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"happyPromotionId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"HAPPY10\",\n  \"name\": \"10% Happy Path\",\n  \"description\": \"Promoción de prueba para el flujo end-to-end\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 10,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/promotions",
+              "host": ["{{base_url}}"],
+              "path": ["promotions"]
+            },
+            "description": "Promoción de 10% de descuento. discountType/discountValue son obligatorios desde la última migración. Guarda el id en {{happyPromotionId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Create Order (with promotion)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"happyOrderId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{happyUserId}}\",\n  \"total\": 5.4,\n  \"items\": [\n    {\n      \"productId\": \"{{happyProductId}}\",\n      \"promotionId\": \"{{happyPromotionId}}\",\n      \"quantity\": 2,\n      \"unitPrice\": 3,\n      \"subtotal\": 6,\n      \"discount\": 0.6\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "Orden de 2 unidades (subtotal 6) usando la promoción del 10% (descuento 0.6, total 5.4). El servidor recalcula el 10% de 6 y lo compara contra el discount enviado — si no coincide, rechaza con 400 (pruébalo cambiando discount a otro valor). También valida que total = subtotal - discount de todos los ítems. Guarda el id de la orden en {{happyOrderId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Pay Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payments\": [\n    { \"method\": \"CASH\", \"amount\": 6 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{happyOrderId}}/pay",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{happyOrderId}}", "pay"]
+            },
+            "description": "Paga con $6 en efectivo. Como el total es 5.4, la respuesta debe traer change: 0.6 y status: COMPLETED."
+          },
+          "response": []
+        },
+        {
+          "name": "8. Get Order by ID (detail)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{happyOrderId}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{happyOrderId}}"]
+            },
+            "description": "Detalle completo de la orden: ítems, producto, promoción aplicada y pagos."
+          },
+          "response": []
+        },
+        {
+          "name": "9. Get Inventory Transactions (SALE ledger)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/inventory/{{happyProductId}}/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "{{happyProductId}}", "transactions"]
+            },
+            "description": "Confirma que la venta quedó registrada en el ledger de inventario (type: SALE, change: -2, quantityBefore: 20, quantityAfter: 18) — este registro antes no se generaba en las ventas, solo en ajustes manuales."
+          },
+          "response": []
+        },
+        {
+          "name": "10. Get Promotion by ID (usageCount updated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/promotions/{{happyPromotionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["promotions", "{{happyPromotionId}}"]
+            },
+            "description": "Confirma que usageCount subió a 1 tras usar la promoción en la orden."
           },
           "response": []
         }
@@ -90,12 +406,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["users"]
             }
           },
           "response": []
@@ -112,13 +424,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/users/cmpsv5dwm0005jwfo46532dxz",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users",
-                "cmpsv5dwm0005jwfo46532dxz"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["users", "cmpsv5dwm0005jwfo46532dxz"]
             }
           },
           "response": []
@@ -143,12 +450,8 @@
             },
             "url": {
               "raw": "{{base_url}}/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["users"]
             }
           },
           "response": []
@@ -173,13 +476,8 @@
             },
             "url": {
               "raw": "{{base_url}}/users/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -207,12 +505,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/products",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "products"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["products"]
             }
           },
           "response": []
@@ -229,13 +523,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/products/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "products",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -265,12 +554,8 @@
             },
             "url": {
               "raw": "{{base_url}}/products",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "products"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["products"]
             }
           },
           "response": []
@@ -295,13 +580,8 @@
             },
             "url": {
               "raw": "{{base_url}}/products/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "products",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -323,13 +603,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/products/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "products",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -356,12 +631,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/categories",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "categories"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
             }
           },
           "response": []
@@ -378,13 +649,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/categories/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "categories",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -414,12 +680,8 @@
             },
             "url": {
               "raw": "{{base_url}}/categories",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "categories"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
             }
           },
           "response": []
@@ -444,13 +706,8 @@
             },
             "url": {
               "raw": "{{base_url}}/categories/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "categories",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -472,13 +729,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/categories/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "categories",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -505,12 +757,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/orders",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
             }
           },
           "response": []
@@ -527,13 +775,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/orders/stats",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                "stats"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["orders", "stats"]
             }
           },
           "response": []
@@ -550,19 +793,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/orders/pending",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                "pending"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["orders", "pending"]
             }
           },
           "response": []
         },
         {
-          "name": "Get Orders montly stats",
+          "name": "Get Orders monthly stats",
           "request": {
             "method": "GET",
             "header": [
@@ -573,13 +811,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/orders/monthlyStats",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                "monthlyStats"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["orders", "monthlyStats"]
             }
           },
           "response": []
@@ -596,13 +829,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/orders/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -633,14 +861,8 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/:id/pay",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                ":id",
-                "pay"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "pay"],
               "variable": [
                 {
                   "key": "id",
@@ -671,12 +893,8 @@
             },
             "url": {
               "raw": "{{base_url}}/orders",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
             }
           },
           "response": []
@@ -701,14 +919,8 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/:id/status",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "orders",
-                ":id",
-                "status"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "status"],
               "variable": [
                 {
                   "key": "id",
@@ -736,12 +948,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/promotions",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "promotions"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["promotions"]
             }
           },
           "response": []
@@ -758,13 +966,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/promotions/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "promotions",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["promotions", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -790,17 +993,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"GALLOTAFREE\",\n  \"name\": \"Galleta Gratis\",\n  \"description\": \"Promoción de galleta gratis por campaña\"\n}"
+              "raw": "{\n  \"code\": \"GALLOTAFREE\",\n  \"name\": \"Galleta Gratis\",\n  \"description\": \"Promoción de galleta gratis por campaña\",\n  \"discountType\": \"FIXED_AMOUNT\",\n  \"discountValue\": 1.5,\n  \"active\": true,\n  \"startDate\": \"2026-07-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"usageLimit\": 100\n}"
             },
             "url": {
               "raw": "{{base_url}}/promotions",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "promotions"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["promotions"]
+            },
+            "description": "discountType es \"PERCENTAGE\" o \"FIXED_AMOUNT\", discountValue es el % o el monto fijo. startDate/endDate/usageLimit son opcionales."
           },
           "response": []
         },
@@ -824,13 +1024,8 @@
             },
             "url": {
               "raw": "{{base_url}}/promotions/:id",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "promotions",
-                ":id"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["promotions", ":id"],
               "variable": [
                 {
                   "key": "id"
@@ -861,17 +1056,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productId\": \"cmpsv5e8l000hjwfociza59nd\",\n  \"newQuantity\": 45,\n  \"reason\": \"Conteo fi�sico\",\n  \"type\": \"COUNT\"\n}"
+              "raw": "{\n  \"productId\": \"cmpsv5e8l000hjwfociza59nd\",\n  \"newQuantity\": 45,\n  \"reason\": \"Conteo físico\",\n  \"type\": \"COUNT\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/inventory/adjust",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "inventory",
-                "adjust"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "adjust"]
             }
           },
           "response": []
@@ -888,14 +1078,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/inventory/:productId/transactions",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "inventory",
-                ":productId",
-                "transactions"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["inventory", ":productId", "transactions"],
               "variable": [
                 {
                   "key": "productId"
@@ -915,13 +1099,9 @@
         "url": {
           "raw": "http://localhost:3000/health",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "3000",
-          "path": [
-            "health"
-          ]
+          "path": ["health"]
         }
       },
       "response": []

@@ -11,7 +11,7 @@ mat-drawer {
   max-width: 15rem;
   display: flex;
   flex-direction: column;
-  background-color: var(--sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-on-surface);
   overflow: hidden;
   transition: width 1000ms ease;
 }
@@ -51,13 +51,13 @@ mat-drawer-content {
 
 /* ===== ICONOS Y TEXTO ===== */
 mat-icon {
-  color: var(--sys-on-surface);
+  color: var(--mat-sys-on-surface);
 }
 
 /* ===== DIVIDERS ===== */
 mat-divider {
   margin: 0rem 1rem 1rem 1rem;
-  border-top-color: var(--sys-outline-variant);
+  border-top-color: var(--mat-sys-outline-variant);
 }
 
 /* SOLO aplica minimized en desktop */

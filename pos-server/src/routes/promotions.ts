@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { authMiddleware, requireRole } from "../middleware/auth";
 import {
+  BadRequestError,
   createPromotion,
   promotionById,
   promotions,
@@ -36,21 +37,12 @@ router.get("/:id", async (req: Request, res: Response) => {
 // CREATE promotion
 router.post("/", requireRole("ADMIN"), async (req: Request, res: Response) => {
   try {
-    const { code, name, description, active } = req.body;
-
-    if (!code || !name) {
-      return res.status(400).json({ error: "Code and name are required" });
-    }
-
-    const promotion = await createPromotion({
-      code,
-      name,
-      description,
-      active: active !== undefined ? Boolean(active) : true,
-    });
-
+    const promotion = await createPromotion(req.body);
     res.status(201).json(promotion);
   } catch (error: any) {
+    if (error instanceof BadRequestError) {
+      return res.status(400).json({ error: error.message });
+    }
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Promotion code already exists" });
     }
@@ -64,17 +56,12 @@ router.put(
   requireRole("ADMIN"),
   async (req: Request, res: Response) => {
     try {
-      const { name, description, active } = req.body;
-      const data: any = {};
-
-      if (name !== undefined) data.name = name;
-      if (description !== undefined) data.description = description;
-      if (active !== undefined) data.active = Boolean(active);
-
-      const promotion = await updatePromotion(req.params.id, data);
-
+      const promotion = await updatePromotion(req.params.id, req.body);
       res.json(promotion);
     } catch (error: any) {
+      if (error instanceof BadRequestError) {
+        return res.status(400).json({ error: error.message });
+      }
       if (error.code === "P2025") {
         return res.status(404).json({ error: "Promotion not found" });
       }

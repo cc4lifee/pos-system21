@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { map, catchError, of, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, User } from '../../shared/interfaces/auth.interface';
-import { Router } from '@angular/router';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 const baseUrl = environment.baseUrl;
@@ -13,11 +12,11 @@ const baseUrl = environment.baseUrl;
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
 
   private _authStatus = signal<AuthStatus>('checking');
   private _user = signal<User | null>(null);
   private _token = signal<string | null>(localStorage.getItem('token'));
+  private _authError = signal<string | null>(null);
 
   authStatus = computed<AuthStatus>(() => {
     if (this._authStatus() === 'checking') return 'checking';
@@ -32,44 +31,40 @@ export class AuthService {
   user = computed(() => this._user());
   token = computed(() => this._token());
   isAdmin = computed(() => this._user()?.role.name === 'ADMIN');
+  authError = computed(() => this._authError());
 
   async login(email: string, password: string): Promise<boolean> {
-    return await firstValueFrom(
-      this.http
-        .post<AuthResponse>(`${baseUrl}/auth/login`, {
-          email,
-          password,
-        })
-        .pipe(
-          map((resp) => this.handleAuthSuccess(resp)),
-          catchError((error) => this.handleAuthError(error)),
-        ),
-    );
+    this._authError.set(null);
+
+    try {
+      const resp = await firstValueFrom(
+        this.http.post<AuthResponse>(`${baseUrl}/auth/login`, { email, password }),
+      );
+      this.handleAuthSuccess(resp);
+      return true;
+    } catch (error) {
+      this.handleAuthError('Correo o contraseña incorrectos');
+      return false;
+    }
   }
 
   async checkStatus(): Promise<boolean> {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
+    if (!this._token()) {
       this.logout();
       return false;
     }
 
-    return await firstValueFrom(
-      this.http
-        .get<AuthResponse>(`${baseUrl}/auth/renew`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .pipe(
-          map((resp) => this.handleAuthSuccess(resp)),
-          catchError((error: any) => this.handleAuthError(error)),
-        ),
-    );
+    try {
+      const resp = await firstValueFrom(this.http.get<AuthResponse>(`${baseUrl}/auth/renew`));
+      this.handleAuthSuccess(resp);
+      return true;
+    } catch (error) {
+      this.handleAuthError('Tu sesión expiró, inicia sesión de nuevo');
+      return false;
+    }
   }
 
-  async logout() {
+  logout(): void {
     localStorage.removeItem('token');
     this._user.set(null);
     this._token.set(null);
@@ -82,12 +77,10 @@ export class AuthService {
     this._token.set(token);
 
     localStorage.setItem('token', token);
-
-    return true;
   }
 
-  private handleAuthError(error: any) {
+  private handleAuthError(message: string) {
+    this._authError.set(message);
     this.logout();
-    return of(false);
   }
 }

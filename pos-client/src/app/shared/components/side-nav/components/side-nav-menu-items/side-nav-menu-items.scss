@@ -28,7 +28,7 @@ div {
 }
 
 button.active {
-  background-color: var(--sys-inverse-primary);
+  background-color: var(--mat-sys-inverse-primary);
 }
 
 .maximized .material-symbols-outlined {
@@ -51,5 +51,5 @@ label > span {
 
 mat-divider {
   margin: 1rem 1rem 1rem 1rem;
-  border-top-color: var(--sys-outline-variant);
+  border-top-color: var(--mat-sys-outline-variant);
 }

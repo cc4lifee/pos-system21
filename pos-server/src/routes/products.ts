@@ -37,7 +37,15 @@ router.get("/:id", async (req: Request, res: Response) => {
 // CREATE product
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { name, description, price, cost, quantity, categoryId } = req.body;
+    const {
+      name,
+      description,
+      price,
+      cost,
+      quantity,
+      trackInventory,
+      categoryId,
+    } = req.body;
 
     if (!name || price === undefined) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -49,6 +57,9 @@ router.post("/", async (req: Request, res: Response) => {
       price: parseFloat(price),
       cost: cost ? parseFloat(cost) : undefined,
       quantity: quantity !== undefined ? parseInt(quantity) : 0,
+      ...(trackInventory !== undefined && {
+        trackInventory: Boolean(trackInventory),
+      }),
       ...(categoryId && { categoryId }),
     });
     res.status(201).json(product);
@@ -63,8 +74,16 @@ router.post("/", async (req: Request, res: Response) => {
 // UPDATE product
 router.put("/:id", async (req: Request, res: Response) => {
   try {
-    const { name, description, price, cost, quantity, categoryId, isActive } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      cost,
+      quantity,
+      trackInventory,
+      categoryId,
+      isActive,
+    } = req.body;
 
     const product = await updateProduct(req.params.id, {
       ...(name && { name }),
@@ -72,6 +91,9 @@ router.put("/:id", async (req: Request, res: Response) => {
       ...(price !== undefined && { price: parseFloat(price) }),
       ...(cost !== undefined && { cost: parseFloat(cost) }),
       ...(quantity !== undefined && { quantity: parseInt(quantity) }),
+      ...(trackInventory !== undefined && {
+        trackInventory: Boolean(trackInventory),
+      }),
       ...(categoryId !== undefined && { categoryId }),
       ...(isActive !== undefined && { isActive }),
     });

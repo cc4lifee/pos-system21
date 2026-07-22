@@ -14,6 +14,7 @@ async function main() {
   await prisma.order.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.promotion.deleteMany();
   await prisma.user.deleteMany();
   await prisma.role.deleteMany();
 
@@ -206,34 +207,59 @@ async function main() {
     }),
   ]);
 
-  // Create sample orders
+  // Create promotions
+  const promoPercentage = await prisma.promotion.create({
+    data: {
+      code: "WELCOME10",
+      name: "10% de descuento de bienvenida",
+      discountType: "PERCENTAGE",
+      discountValue: 10,
+      active: true,
+    },
+  });
+  const promoFixed = await prisma.promotion.create({
+    data: {
+      code: "DOLAR1",
+      name: "$1 de descuento",
+      discountType: "FIXED_AMOUNT",
+      discountValue: 1,
+      active: true,
+    },
+  });
+
+  // Create sample orders (Product.price is Decimal, so it's coerced to a
+  // plain number before doing arithmetic with it)
+  const price0 = Number(products[0].price);
+  const price1 = Number(products[1].price);
+  const price2 = Number(products[2].price);
+  const price3 = Number(products[3].price);
+
   const order1 = await prisma.order.create({
     data: {
       orderNumber: `ORD-${Date.now()}`,
       userId: cashier1.id,
-      total: products[0].price + products[1].price,
+      total: price0 + price1,
       status: "COMPLETED",
-      paymentMethod: "CARD",
       items: {
         create: [
           {
             productId: products[0].id,
             quantity: 1,
-            unitPrice: products[0].price,
-            subtotal: products[0].price,
+            unitPrice: price0,
+            subtotal: price0,
           },
           {
             productId: products[1].id,
             quantity: 1,
-            unitPrice: products[1].price,
-            subtotal: products[1].price,
+            unitPrice: price1,
+            subtotal: price1,
           },
         ],
       },
       payments: {
         create: [
           {
-            amount: products[0].price + products[1].price,
+            amount: price0 + price1,
             method: "CARD",
             status: "COMPLETED",
             transactionRef: "TXN-001",
@@ -248,16 +274,41 @@ async function main() {
     data: {
       orderNumber: `ORD-${Date.now() + 1}`,
       userId: cashier2.id,
-      total: products[3].price,
+      total: price3,
       status: "PENDING",
-      paymentMethod: "CASH",
       items: {
         create: [
           {
             productId: products[3].id,
             quantity: 1,
-            unitPrice: products[3].price,
-            subtotal: products[3].price,
+            unitPrice: price3,
+            subtotal: price3,
+          },
+        ],
+      },
+    },
+    include: { items: true },
+  });
+
+  // Order using a promotion, to exercise the promotion validation flow
+  const promoDiscount = Number(
+    (price2 * (Number(promoPercentage.discountValue) / 100)).toFixed(2),
+  );
+  const order3 = await prisma.order.create({
+    data: {
+      orderNumber: `ORD-${Date.now() + 2}`,
+      userId: cashier1.id,
+      total: price2 - promoDiscount,
+      status: "PENDING",
+      items: {
+        create: [
+          {
+            productId: products[2].id,
+            promotionId: promoPercentage.id,
+            quantity: 1,
+            unitPrice: price2,
+            subtotal: price2,
+            discount: promoDiscount,
           },
         ],
       },
@@ -276,7 +327,11 @@ async function main() {
 
   console.log(`\n✓ ${products.length} products created`);
 
-  console.log(`\n✓ ${2} sample orders created`);
+  console.log("\n✓ Promotions created:");
+  console.log(`  - ${promoPercentage.code} (${promoPercentage.discountType})`);
+  console.log(`  - ${promoFixed.code} (${promoFixed.discountType})`);
+
+  console.log(`\n✓ ${3} sample orders created (order ${order3.orderNumber} uses ${promoPercentage.code})`);
   console.log("\n✨ Database seeded successfully!");
 }
 

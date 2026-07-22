@@ -24,6 +24,7 @@ model User {
 
   orders                Order[]
   inventoryTransactions InventoryTransaction[]
+  payments              Payment[]
 
   @@map("users")
 }
@@ -37,17 +38,29 @@ model Role {
   @@map("roles")
 }
 
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
 model Promotion {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String        @id @default(cuid())
+  code          String        @unique
+  name          String
+  description   String?
+  discountType  PromotionType
+  discountValue Decimal       @db.Decimal(10, 2)
+  active        Boolean       @default(true)
+  startDate     DateTime?
+  endDate       DateTime?
+  usageLimit    Int?
+  usageCount    Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   orderItems OrderItem[]
 
+  @@index([active])
   @@map("promotions")
 }
 
@@ -68,8 +81,8 @@ model Product {
   id             String    @id @default(cuid())
   name           String
   description    String?
-  price          Float
-  cost           Float?
+  price          Decimal   @db.Decimal(10, 2)
+  cost           Decimal?  @db.Decimal(10, 2)
   quantity       Int       @default(0)
   trackInventory Boolean   @default(false)
   categoryId     String?
@@ -90,8 +103,8 @@ model Order {
   id            String        @id @default(cuid())
   orderNumber   String        @unique
   userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  total         Float
+  user          User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  total         Decimal       @db.Decimal(10, 2)
   status        OrderStatus   @default(PENDING)
   notes         String?
   createdAt     DateTime      @default(now())
@@ -101,6 +114,7 @@ model Order {
   payments Payment[]
 
   @@index([userId])
+  @@index([status, createdAt])
   @@map("orders")
 }
 
@@ -157,9 +171,9 @@ model OrderItem {
   promotionId String?
   promotion   Promotion? @relation(fields: [promotionId], references: [id])
   quantity    Int
-  unitPrice   Float
-  subtotal    Float
-  discount    Float      @default(0)
+  unitPrice   Decimal    @db.Decimal(10, 2)
+  subtotal    Decimal    @db.Decimal(10, 2)
+  discount    Decimal    @default(0) @db.Decimal(10, 2)
 
   @@index([orderId])
   @@index([productId])
@@ -178,7 +192,9 @@ model Payment {
   id             String        @id @default(cuid())
   orderId        String
   order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  amount         Float
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  amount         Decimal       @db.Decimal(10, 2)
   method         PaymentMethod
   status         PaymentStatus @default(COMPLETED)
   transactionRef String?
@@ -186,5 +202,6 @@ model Payment {
   updatedAt      DateTime      @updatedAt
 
   @@index([orderId])
+  @@index([userId])
   @@map("payments")
 }

@@ -1,11 +1,8 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Theming for Angular Material is included via `mat.theme()` in ./styles/theme-colors.scss.
+// Learn more at https://material.angular.dev/guide/theming
 @use 'material-symbols/outlined.css';
 @use '@angular/material' as mat;
-@use 'theme-colors.scss';
+@use './styles/theme-colors.scss';
 
 body {
   margin: 0;
@@ -21,7 +18,7 @@ body {
 :root {
   @include mat.sidenav-overrides(
     (
-      content-background-color: var(--sys-surface-container-lowest),
+      content-background-color: var(--mat-sys-surface-container-lowest),
     )
   );
 }

@@ -181,6 +181,16 @@ export const createOrder = async ({
     };
   });
 
+  const itemsTotal = parsedItems.reduce(
+    (sum, item) => sum + (item.subtotal - item.discount),
+    0,
+  );
+  if (Math.abs(itemsTotal - Number(total)) > 0.01) {
+    throw new BadRequestError(
+      "Total must match the sum of item subtotals minus discounts",
+    );
+  }
+
   // ✅ Solo parsea si vienen payments, no lanza error si no vienen
   const parsedPayments =
     payments && Array.isArray(payments) && payments.length > 0
@@ -212,8 +222,10 @@ export const createOrder = async ({
   }
 
   return prisma.$transaction(async (tx) => {
-    const orderCount = await tx.order.count();
-    const orderNumber = `${String(orderCount + 1).padStart(4, "0")}`;
+    const seqResult = await tx.$queryRaw<
+      { val: string }[]
+    >`SELECT nextval('order_number_seq')::text as val`;
+    const orderNumber = seqResult[0].val.padStart(4, "0");
 
     const productIds = parsedItems.map((item) => item.productId);
     const dbProducts = await tx.product.findMany({
@@ -224,9 +236,17 @@ export const createOrder = async ({
       throw new BadRequestError("One or more products not found");
     }
 
+    const requiredQuantityByProduct = new Map<string, number>();
     for (const item of parsedItems) {
-      const prod = dbProducts.find((p) => p.id === item.productId)!;
-      if (prod.trackInventory && prod.quantity < item.quantity) {
+      requiredQuantityByProduct.set(
+        item.productId,
+        (requiredQuantityByProduct.get(item.productId) || 0) + item.quantity,
+      );
+    }
+
+    for (const prod of dbProducts) {
+      const required = requiredQuantityByProduct.get(prod.id) || 0;
+      if (prod.trackInventory && prod.quantity < required) {
         throw new BadRequestError(
           `Insufficient stock for product: ${prod.name}`,
         );
@@ -237,13 +257,56 @@ export const createOrder = async ({
       .map((item) => item.promotionId)
       .filter((promotionId): promotionId is string => Boolean(promotionId));
 
+    const promotionUsage = new Map<string, number>();
+
     if (promotionIds.length > 0) {
-      const promotions = await tx.promotion.findMany({
+      const dbPromotions = await tx.promotion.findMany({
         where: { id: { in: promotionIds } },
       });
 
-      if (promotions.length !== new Set(promotionIds).size) {
+      if (dbPromotions.length !== new Set(promotionIds).size) {
         throw new BadRequestError("One or more promotions not found");
+      }
+
+      const promotionsById = new Map(dbPromotions.map((p) => [p.id, p]));
+      const now = new Date();
+
+      for (const item of parsedItems) {
+        if (!item.promotionId) continue;
+        const promo = promotionsById.get(item.promotionId)!;
+
+        if (!promo.active) {
+          throw new BadRequestError(`Promotion ${promo.code} is not active`);
+        }
+        if (promo.startDate && now < promo.startDate) {
+          throw new BadRequestError(`Promotion ${promo.code} is not yet valid`);
+        }
+        if (promo.endDate && now > promo.endDate) {
+          throw new BadRequestError(`Promotion ${promo.code} has expired`);
+        }
+
+        const usedSoFar = promotionUsage.get(promo.id) || 0;
+        if (
+          promo.usageLimit !== null &&
+          promo.usageCount + usedSoFar >= promo.usageLimit
+        ) {
+          throw new BadRequestError(
+            `Promotion ${promo.code} usage limit reached`,
+          );
+        }
+        promotionUsage.set(promo.id, usedSoFar + 1);
+
+        const discountValue = Number(promo.discountValue);
+        const expectedDiscount =
+          promo.discountType === "PERCENTAGE"
+            ? item.subtotal * (discountValue / 100)
+            : Math.min(discountValue, item.subtotal);
+
+        if (Math.abs(expectedDiscount - item.discount) > 0.01) {
+          throw new BadRequestError(
+            `Discount for item with promotion ${promo.code} does not match the promotion's value`,
+          );
+        }
       }
     }
 
@@ -285,14 +348,36 @@ export const createOrder = async ({
       },
     });
 
-    for (const item of parsedItems) {
-      const prod = dbProducts.find((p) => p.id === item.productId)!;
-      if (prod.trackInventory) {
-        await tx.product.update({
-          where: { id: prod.id },
-          data: { quantity: prod.quantity - item.quantity },
-        });
-      }
+    for (const [productId, requiredQuantity] of requiredQuantityByProduct) {
+      const prod = dbProducts.find((p) => p.id === productId)!;
+      if (!prod.trackInventory) continue;
+
+      const quantityBefore = prod.quantity;
+      const quantityAfter = quantityBefore - requiredQuantity;
+
+      await tx.product.update({
+        where: { id: productId },
+        data: { quantity: quantityAfter },
+      });
+
+      await tx.inventoryTransaction.create({
+        data: {
+          productId,
+          userId,
+          change: -requiredQuantity,
+          type: "SALE",
+          referenceId: order.id,
+          quantityBefore,
+          quantityAfter,
+        },
+      });
+    }
+
+    for (const [promotionId, count] of promotionUsage) {
+      await tx.promotion.update({
+        where: { id: promotionId },
+        data: { usageCount: { increment: count } },
+      });
     }
 
     return order;
@@ -328,13 +413,14 @@ export const payOrder = async (
   });
 
   const paymentTotal = parsedPayments.reduce((sum, p) => sum + p.amount, 0);
+  const orderTotal = Number(order.total);
 
   // ✅ No puede pagar menos del total
-  if (paymentTotal - order.total < -0.01) {
+  if (paymentTotal - orderTotal < -0.01) {
     throw new BadRequestError("Payment total is less than order total");
   }
 
-  const change = paymentTotal - order.total;
+  const change = paymentTotal - orderTotal;
 
   return prisma.$transaction(async (tx) => {
     await tx.payment.createMany({
@@ -403,7 +489,7 @@ export const orderStats = async () => {
 
   return {
     totalOrders,
-    totalRevenue: revenue._sum.total ?? 0,
+    totalRevenue: Number(revenue._sum.total ?? 0),
   };
 };
 
@@ -419,7 +505,7 @@ export const pendingOrders = () => {
   });
 };
 
-export const orderMontlyStats = async () => {
+export const orderMonthlyStats = async () => {
   const [completedOrders, cancelledOrders, revenue] = await Promise.all([
     prisma.order.count({
       where: {
@@ -455,6 +541,6 @@ export const orderMontlyStats = async () => {
   return {
     completedOrders,
     cancelledOrders,
-    totalRevenue: revenue._sum.total ?? 0,
+    totalRevenue: Number(revenue._sum.total ?? 0),
   };
 };

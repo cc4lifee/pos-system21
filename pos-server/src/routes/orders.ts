@@ -4,7 +4,7 @@ import {
   BadRequestError,
   createOrder,
   orderById,
-  orderMontlyStats,
+  orderMonthlyStats,
   getOrders,
   orderStats,
   pendingOrders,
@@ -45,7 +45,7 @@ router.get("/stats", async (req: Request, res: Response) => {
 
 router.get("/monthlyStats", async (req: Request, res: Response) => {
   try {
-    const result = await orderMontlyStats();
+    const result = await orderMonthlyStats();
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders", details: error });
